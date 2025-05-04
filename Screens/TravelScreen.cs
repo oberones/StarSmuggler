@@ -19,6 +19,10 @@ namespace StarSmuggler.Screens
         private SpriteFont font;
         private GraphicsDevice graphicsDevice;
         private List<Button> travelButtons;
+        private Terminal terminalWindow;
+        private Texture2D terminalTexture;
+
+
 
         // GenerateTravelButtons is a helper function to create the travel buttons with as little code as possible
         private void GenerateTravelButtons(GraphicsDevice graphics, ContentManager content)
@@ -73,7 +77,17 @@ namespace StarSmuggler.Screens
             font = content.Load<SpriteFont>("Fonts/Terminal");
             buttonTexture = content.Load<Texture2D>("UI/button");
             backgroundTexture = content.Load<Texture2D>("UI/cockpit");
+            terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
+            // Calculate the center position for the Terminal
+            int screenWidth = graphicsDevice.Viewport.Width;
+            int screenHeight = graphicsDevice.Viewport.Height;
+            int terminalWidth = 900; // Width of the Terminal
+            int terminalHeight = 904; // Height of the Terminal
 
+            int terminalX = (screenWidth - terminalWidth) / 2;
+            int terminalY = (screenHeight - terminalHeight) / 2;
+
+            terminalWindow = new Terminal(new Rectangle(terminalX, terminalY, terminalWidth, terminalHeight), texture: terminalTexture);
             // Define the back button
             backButton = new BackButton(font, buttonTexture, 700, 650, 200, 50);
             
@@ -107,6 +121,7 @@ namespace StarSmuggler.Screens
         {
             spriteBatch.Begin();
             spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            terminalWindow.Draw(spriteBatch);
             spriteBatch.DrawString(font, $"Select Destination (Credits: {GameManager.Instance.Player.Credits})", new Vector2(50, 20), Color.White);
 
             foreach (var button in travelButtons)

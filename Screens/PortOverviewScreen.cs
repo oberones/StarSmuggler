@@ -84,13 +84,21 @@ namespace StarSmuggler.Screens
         {
 
             spriteBatch.Begin();
-            int xOffset = terminalX + 75;
-            int yOffset = terminalY + 75;;
+            int xOffset = terminalX + 100;
+            int yOffset = terminalY + 100;;
+
+            // Draw the background texture
             spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            
+            // Draw the terminal window
             terminalWindow.Draw(spriteBatch);
+
+            // Draw the port name
             spriteBatch.DrawString(font, $"Welcome to: {portName}", new Vector2(xOffset, yOffset), Color.Green);
+
+            // Draw the port description and wrap it if necessary
             string wrappedPortDesc = WrapText(font, portDescription, terminalWindow.Bounds.Width - 20); // Add padding
-            spriteBatch.DrawString(font, wrappedPortDesc, new Vector2(xOffset, yOffset + 30), Color.Green);
+            spriteBatch.DrawString(font, wrappedPortDesc, new Vector2(xOffset, yOffset + 60), Color.LightGreen);
             continueButton.Draw(spriteBatch);
 
             if (GameManager.Instance.GetLastEvent() is GameEvent evt)
