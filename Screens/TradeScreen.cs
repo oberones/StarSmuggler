@@ -29,9 +29,7 @@ namespace StarSmuggler.Screens
 
         public void Refresh(ContentManager content)
         {
-            // Reload whatever content depends on game state
 
-            // Optional: re-roll event text or background
         }
 
         public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
@@ -46,7 +44,7 @@ namespace StarSmuggler.Screens
 
             buyButtons = new List<Button>();
             sellButtons = new List<Button>();
-            int doneButtonY = baseY + goods.Count * spacingY + 40;
+            // int doneButtonY = baseY + goods.Count * spacingY + 40;
             
             // Calculate the center position for the Terminal
             int screenWidth = graphicsDevice.Viewport.Width;
@@ -120,6 +118,7 @@ namespace StarSmuggler.Screens
                 if (doneButton.WasClicked)
                 {
                     Game1.AudioManager.PlaySfx("click");
+                    GameManager.Instance.CheckForGameOver();
                     SaveLoadManager.SaveGame(GameManager.Instance.Player);
                     GameManager.Instance.SetGameState(GameState.TravelScreen);
                 }

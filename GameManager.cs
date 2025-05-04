@@ -17,6 +17,50 @@ namespace StarSmuggler
 
         private GameManager() { }
 
+        public void CheckForGameOver()
+        {
+            var player = Player;
+            var port = player.CurrentPort;
+
+            if (player.Credits >= 50)
+                return; // Player can still travel
+
+            // Try to find if cargo is sellable for enough to earn 50
+            int potentialRevenue = 0;
+
+            foreach (var good in player.CargoHold)
+            {
+                if (port.AvailableGoods.Contains(good.Key))
+                {
+                    var marketPrice = port.AvailableGoods.Find(g => g == good.Key).BasePrice;
+                    potentialRevenue += good.Value * marketPrice;
+
+                    if (potentialRevenue >= 50)
+                        return; // Can sell enough to continue
+                }
+            }
+
+            // No way to travel or make money → game over
+            SetGameState(GameState.GameOver);
+        }
+
+        public int GetTravelCost(Port from, Port to)
+        {
+            if (from == to)
+                return 0;
+
+            int baseCost = 50;
+
+            // Add cost based on zone difference
+            int zoneDiff = Math.Abs((int)from.Zone - (int)to.Zone);
+            int cost = baseCost + zoneDiff * 25;
+
+            if (zoneDiff >= 2)
+                cost += 50;
+
+            return cost;
+        }
+
         public void LoadGame()
         {
             if (SaveLoadManager.TryLoadGame(out var data))
@@ -66,6 +110,7 @@ namespace StarSmuggler
                 SetGameState(GameState.PortOverview); 
                 TriggerRandomEvent();
                 SaveLoadManager.SaveGame(Player);
+                GameManager.Instance.CheckForGameOver();
                 // Autosave after successful travel
 
             }

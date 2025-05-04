@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using StarSmuggler.UI;
 using System;
+using System.Linq;
 
 namespace StarSmuggler.Screens
 {
@@ -16,40 +17,53 @@ namespace StarSmuggler.Screens
         private List<Button> travelButtons;
         private Texture2D backgroundTexture;
 
-        public void Refresh(ContentManager content)
-        {
-            // Reload whatever content depends on game state
-            // Optional: re-roll event text or background
-            // backgroundTexture = content.Load<Texture2D>($"Ports/{currentPort.Name.ToLower()}");
-        }
+        private GraphicsDevice graphicsDevice; // Store this at class level
 
-        public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
+        private void GenerateTravelButtons(GraphicsDevice graphics, ContentManager content)
         {
-            font = content.Load<SpriteFont>("Fonts/Default");
-            buttonTexture = content.Load<Texture2D>("UI/button");
             Port currentPort = GameManager.Instance.CurrentPort;
-            backgroundTexture = content.Load<Texture2D>("UI/cockpit");
-            availableDestinations = PortsDatabase.AllPorts.FindAll(p => p != currentPort);
+            availableDestinations = PortsDatabase.AllPorts
+                .Where(p => p != currentPort)
+                .ToList();
+
             travelButtons = new List<Button>();
-            Game1.AudioManager.LoadSfx("click");
-            int screenWidth = graphicsDevice.Viewport.Width; // Get the screen width
-            int buttonWidth = 300; // Width of the button
+
+            int screenWidth = graphics.Viewport.Width;
+            int buttonWidth = 300;
             int startY = 100;
             int spacingY = 70;
 
             for (int i = 0; i < availableDestinations.Count; i++)
             {
                 Port dest = availableDestinations[i];
-                int travelCost = GetTravelCost(currentPort, dest);
-
+                int travelCost = GameManager.Instance.GetTravelCost(currentPort, dest);
                 string label = $"{dest.Name} - ${travelCost}";
-                // Calculate the X position to center the button
+
                 int buttonX = (screenWidth - buttonWidth) / 2;
                 Rectangle rect = new Rectangle(buttonX, startY + i * spacingY, buttonWidth, 50);
 
                 var button = new Button(rect, label, font, buttonTexture);
                 travelButtons.Add(button);
             }
+        }
+
+
+        public void Refresh(ContentManager content)
+        {
+            // Reload whatever content depends on game state
+            GenerateTravelButtons(graphicsDevice, content);
+        }
+
+        public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
+        {
+            this.graphicsDevice = graphicsDevice; // Cache for refresh use
+            font = content.Load<SpriteFont>("Fonts/Default");
+            buttonTexture = content.Load<Texture2D>("UI/button");
+            backgroundTexture = content.Load<Texture2D>("UI/cockpit");
+
+            Game1.AudioManager.LoadSfx("click");
+
+            GenerateTravelButtons(graphicsDevice, content);
         }
 
         public void Update(GameTime gameTime)
@@ -62,7 +76,7 @@ namespace StarSmuggler.Screens
                 {
                     Game1.AudioManager.PlaySfx("click");
                     Port destination = availableDestinations[i];
-                    int cost = GetTravelCost(GameManager.Instance.CurrentPort, destination);
+                    int cost = GameManager.Instance.GetTravelCost(GameManager.Instance.CurrentPort, destination);
                     Console.WriteLine($"Travelling to destination port: {destination.Name}, Travel Cost: {cost}");
                     GameManager.Instance.TravelToPort(destination, cost);
                 }
@@ -83,11 +97,11 @@ namespace StarSmuggler.Screens
             spriteBatch.End();
         }
 
-        private int GetTravelCost(Port from, Port to)
-        {
-            // Basic cost system based on zone distance
-            int zoneDifference = System.Math.Abs((int)from.Zone - (int)to.Zone);
-            return 50 + (zoneDifference * 100); // e.g., Inner → Outer = +100, Inner → Fringe = +200
-        }
+        // private int GetTravelCost(Port from, Port to)
+        // {
+        //     // Basic cost system based on zone distance
+        //     int zoneDifference = System.Math.Abs((int)from.Zone - (int)to.Zone);
+        //     return 50 + (zoneDifference * 100); // e.g., Inner → Outer = +100, Inner → Fringe = +200
+        // }
     }
 }

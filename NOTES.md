@@ -216,12 +216,10 @@ TODO:
   - Adjust prices randomly up or down from base each time you travel
   - Add some kind of travel animation that shows the stars going by
   - Add custom fonts that can be sized/scaled more easily
-  - Add victory and loss conditions
+  - Add victory conditions
   - Add mini games for fighting baddies
   - Incorporate factions into events price fluctuations
   - Add quests to do things like find rare items
   - Add lots more items
   - Add more ports
-  - Fix bug with travel cost not reflecting on buttons after travelling to outer planets
-    - Maybe refactor to use fuel and add that to the goods list or else you can only refuel in certain ports
   - Consider replacing the button approach on the travel screen with a star map

@@ -57,6 +57,8 @@ public class Game1 : Game
         screenManager.Register(GameState.TradeScreen, new TradeScreen());
         screenManager.Register(GameState.TravelScreen, new TravelScreen());
         screenManager.Register(GameState.PortOverview, new PortOverviewScreen());
+        screenManager.Register(GameState.GameOver, new GameOverScreen());
+
 
         AudioManager = new AudioManager();
         AudioManager.Initialize(Content);
