@@ -23,10 +23,10 @@ namespace StarSmuggler.UI
             var buttonHeight = bounds.Height;
 
             minusButton = new Button(
-                new Rectangle(bounds.X + 397, bounds.Y + 50, buttonWidth, buttonHeight), "-", font, buttonTexture);
+                new Rectangle(bounds.X + 25, bounds.Y + 47, buttonWidth, buttonHeight), "-", font, buttonTexture);
 
             plusButton = new Button(
-                new Rectangle(bounds.X + 397 - (buttonWidth + 20 ), bounds.Y + 50 , buttonWidth, buttonHeight), "+", font, buttonTexture);
+                new Rectangle(bounds.X + 25 - (buttonWidth + 20 ), bounds.Y + 47 , buttonWidth, buttonHeight), "+", font, buttonTexture);
         }
 
         public void Update(GameTime gameTime)

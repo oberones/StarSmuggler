@@ -16,8 +16,6 @@ namespace StarSmuggler {
         public GoodRarity Rarity { get; set; }
         public int BasePrice { get; set; }
 
-        // Optional: Could include volatility, legality flags, etc.
-
         public Good(string name, string description, GoodRarity rarity, int basePrice)
         {
             Name = name;

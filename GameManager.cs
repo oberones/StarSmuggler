@@ -13,6 +13,7 @@ namespace StarSmuggler
         public Port CurrentPort => Player.CurrentPort;
         private GameEvent lastEvent;
         private GameState? previousState;
+    
 
 
         private GameManager() { }
@@ -124,7 +125,40 @@ namespace StarSmuggler
         public void LoadGoodsForCurrentPort()
         {
             var available = GoodsDatabase.GetCommonAndMidTier(6);
+            Console.WriteLine($"GM Loading goods for port: {Player.CurrentPort.Name}");
+            foreach (var good in available)
+            {
+                Console.WriteLine($"Available Good: {good.Name}");
+            }
             Player.CurrentPort.AvailableGoods = available;
+            GenerateMarketPrices();
+        }
+
+        public void GenerateMarketPrices()
+        {
+            Console.WriteLine($"GM Generating market prices for port: {Player.CurrentPort.Name}");
+            Player.CurrentPort.CurrentPrices.Clear();
+            
+            foreach (var good in Player.CurrentPort.AvailableGoods)
+            {
+                // Allow +/- 30% price swing
+                Console.WriteLine($"GM Generating market prices for : {good.Name}");
+                float variance = 0.3f;
+                float multiplier = 1f + RandomHelper.Range(-variance, variance);
+                int newPrice = (int)MathF.Max(1, good.BasePrice * multiplier);
+
+                Player.CurrentPort.CurrentPrices[good] = newPrice;
+            }
+        }
+
+        public static class RandomHelper
+        {
+            private static Random rng = new();
+
+            public static float Range(float min, float max)
+            {
+                return (float)(min + rng.NextDouble() * (max - min));
+            }
         }
 
         public void SetGameState(GameState newState)

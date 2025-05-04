@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
 using System.Collections.Generic;
 using StarSmuggler.UI;
+using System;
 
 
 namespace StarSmuggler.Screens
@@ -24,27 +25,29 @@ namespace StarSmuggler.Screens
         private Texture2D terminalTexture;
         private Terminal terminalWindow;
         private List<NumericInput> numericInputs;
+        private Port currentPort;
 
         private int spacingY = 80;
-        private int baseY = 120;
+        private int baseY = 150;
 
 
         public void Refresh(ContentManager content)
         {
-
+            currentPort = GameManager.Instance.CurrentPort;
+            goods = GameManager.Instance.CurrentPort.AvailableGoods;
         }
 
         public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
         {
+            Game1.AudioManager.LoadSfx("click");
             buttonFont = content.Load<SpriteFont>("Fonts/Terminal");
             textFont = content.Load<SpriteFont>("Fonts/Terminal16");
             buttonTexture = content.Load<Texture2D>("UI/button");
             terminalButtonTexture = content.Load<Texture2D>("UI/terminalButton");
             terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
-            
-            Game1.AudioManager.LoadSfx("click");
-            var port = GameManager.Instance.CurrentPort;
-            goods = port.AvailableGoods;
+
+            currentPort = GameManager.Instance.CurrentPort;
+            goods = currentPort.AvailableGoods;
 
             buyButtons = new List<Button>();
             sellButtons = new List<Button>();
@@ -67,8 +70,8 @@ namespace StarSmuggler.Screens
             {
                 int y = baseY + i * spacingY;
 
-                buyButtons.Add(new Button(new Rectangle(600, y, 0, 40), "Buy", buttonFont, buttonTexture));
-                sellButtons.Add(new Button(new Rectangle(700, y, 80, 40), "Sell", buttonFont, buttonTexture));
+                buyButtons.Add(new Button(new Rectangle(0, y, 80, 40), "Buy", buttonFont, buttonTexture));
+                sellButtons.Add(new Button(new Rectangle(0, y, 80, 40), "Sell", buttonFont, buttonTexture));
 
                 var inputRect = new Rectangle(500, y-60, 80, 40);
                 numericInputs.Add(new NumericInput(inputRect, buttonFont, buttonTexture));
@@ -150,27 +153,29 @@ namespace StarSmuggler.Screens
                 Color.White
             );
 
+            Console.WriteLine($"TS Drawing inventory prices for : {GameManager.Instance.CurrentPort.Name}");
             // Draw goods, buttons, and numeric inputs inside the terminal
             for (int i = 0; i < goods.Count; i++)
             {
-                int y = terminalY + 32 + i * spacingY; // Offset Y relative to the terminal
+                int y = terminalY + 25 + i * spacingY; // Offset Y relative to the terminal
 
                 var good = goods[i];
                 int ownedQty = GameManager.Instance.Player.CargoHold.ContainsKey(good) ? GameManager.Instance.Player.CargoHold[good] : 0;
                 int qty = numericInputs[i].Value;
 
                 // Draw the good's information
-                string line = $"{good.Name} - ${good.BasePrice} | Owned: {ownedQty}";
+                var price = GameManager.Instance.CurrentPort.CurrentPrices[good];
+                string line = $"{good.Name} - ${price} | Owned: {ownedQty}";
                 spriteBatch.DrawString(textFont, line, new Vector2(terminalX + 20, y), Color.LightGray);
 
                 // Draw numeric input, buy button, and sell button relative to the terminal
-                numericInputs[i].Bounds = new Rectangle(terminalX + 400, y, 80, 40); // Selected value
+                numericInputs[i].Bounds = new Rectangle(terminalX + 26, y+35, 80, 40); // Selected value
                 numericInputs[i].Draw(spriteBatch);
 
-                buyButtons[i].Bounds = new Rectangle(terminalX + 500, y, 80, 40); // Adjust position
+                buyButtons[i].Bounds = new Rectangle(terminalX + 160, y+35, 80, 40); // Adjust position
                 buyButtons[i].Draw(spriteBatch);
 
-                sellButtons[i].Bounds = new Rectangle(terminalX + 600, y, 80, 40); // Adjust position
+                sellButtons[i].Bounds = new Rectangle(terminalX + 260, y+35, 80, 40); // Adjust position
                 sellButtons[i].Draw(spriteBatch);
             }
             // Draw the back button
