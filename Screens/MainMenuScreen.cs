@@ -29,17 +29,17 @@ namespace StarSmuggler.Screens
             currentSong = content.Load<Song>($"Music/singularity");
             Game1.AudioManager.PlaySong("singularity");
             Game1.AudioManager.LoadSfx("click");
-            font = content.Load<SpriteFont>("Fonts/Default");
+            font = content.Load<SpriteFont>("Fonts/TerminalBold");
             buttonTexture = content.Load<Texture2D>("UI/button");
             backgroundTexture = content.Load<Texture2D>("UI/MainMenu");
-            logoTexture = content.Load<Texture2D>("UI/logo");
+            logoTexture = content.Load<Texture2D>("UI/logo1");
             buttons = new List<Button>();
-            int startY = 400;
+            int startY = 450;
             int spacing = 70;
 
             for (int i = 0; i < labels.Length; i++)
             {
-                var rect = new Rectangle(600, startY + i * spacing, 300, 50);
+                var rect = new Rectangle(700, startY + i * spacing, 200, 50);
                 buttons.Add(new Button(rect, labels[i], font, buttonTexture));
             }
         }
@@ -81,7 +81,7 @@ namespace StarSmuggler.Screens
         {
             spriteBatch.Begin();
             spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
-            spriteBatch.Draw(logoTexture, new Rectangle(525, 50, 442, 262), Color.White);
+            spriteBatch.Draw(logoTexture, new Rectangle(434, 25, 1463/2, 612/2), Color.White);
             // spriteBatch.DrawString(font, "SPACE SMUGGLER", new Vector2(480, 150), Color.White);
 
             foreach (var btn in buttons)

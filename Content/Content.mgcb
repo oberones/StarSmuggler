@@ -60,6 +60,12 @@
 /processorParam:Quality=Best
 /build:Music/singularity.mp3
 
+#begin Music/world_default.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/world_default.mp3
+
 #begin Ports/ceres.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -215,6 +221,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:UI/logo.png
+
+#begin UI/logo1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/logo1.png
 
 #begin UI/MainMenu.png
 /importer:TextureImporter

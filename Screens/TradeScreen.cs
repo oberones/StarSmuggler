@@ -10,6 +10,7 @@ namespace StarSmuggler.Screens
 {
     public class TradeScreen : IScreen
     {
+        private BackButton backButton;
         private SpriteFont buttonFont;
         private SpriteFont textFont;
         private Texture2D buttonTexture;
@@ -40,6 +41,7 @@ namespace StarSmuggler.Screens
             buttonTexture = content.Load<Texture2D>("UI/button");
             terminalButtonTexture = content.Load<Texture2D>("UI/terminalButton");
             terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
+            
             Game1.AudioManager.LoadSfx("click");
             var port = GameManager.Instance.CurrentPort;
             goods = port.AvailableGoods;
@@ -71,11 +73,13 @@ namespace StarSmuggler.Screens
                 var inputRect = new Rectangle(500, y-60, 80, 40);
                 numericInputs.Add(new NumericInput(inputRect, buttonFont, buttonTexture));
             }
+            backButton = new BackButton(buttonFont, terminalButtonTexture, 963, 671, 100, 51);
             doneButton = new Button(new Rectangle(1078, 670, 100, 51), "Done", buttonFont, terminalButtonTexture, Color.White);
         }
 
         public void Update(GameTime gameTime)
         {
+            backButton.Update(gameTime);
             for (int i = 0; i < goods.Count; i++)
             {
                 buyButtons[i].Update(gameTime);
@@ -169,7 +173,10 @@ namespace StarSmuggler.Screens
                 sellButtons[i].Bounds = new Rectangle(terminalX + 600, y, 80, 40); // Adjust position
                 sellButtons[i].Draw(spriteBatch);
             }
-            // doneButton.Bounds = new Rectangle(terminalX + 20, terminalY + terminalWindow.Bounds.Height - 60, 120, 40); // Adjust position
+            // Draw the back button
+            backButton.Draw(spriteBatch);
+
+            // Draw the done button
             doneButton.Draw(spriteBatch);
             spriteBatch.End();
         }

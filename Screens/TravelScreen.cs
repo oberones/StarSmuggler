@@ -10,17 +10,20 @@ namespace StarSmuggler.Screens
 {
     public class TravelScreen : IScreen
     {
-        private SpriteFont font;
-        private Texture2D buttonTexture;
-
+        // Class variables are accessible to all methods in this class
+        // They are not accessible to other classes unless they are public or protected
         private List<Port> availableDestinations;
-        private List<Button> travelButtons;
         private Texture2D backgroundTexture;
+        private BackButton backButton;
+        private Texture2D buttonTexture;
+        private SpriteFont font;
+        private GraphicsDevice graphicsDevice;
+        private List<Button> travelButtons;
 
-        private GraphicsDevice graphicsDevice; // Store this at class level
-
+        // GenerateTravelButtons is a helper function to create the travel buttons with as little code as possible
         private void GenerateTravelButtons(GraphicsDevice graphics, ContentManager content)
         {
+            // Get the current port and available destinations
             Port currentPort = GameManager.Instance.CurrentPort;
             availableDestinations = PortsDatabase.AllPorts
                 .Where(p => p != currentPort)
@@ -29,10 +32,12 @@ namespace StarSmuggler.Screens
             travelButtons = new List<Button>();
 
             int screenWidth = graphics.Viewport.Width;
-            int buttonWidth = 300;
+            int buttonWidth = 500;
             int startY = 100;
             int spacingY = 70;
 
+            // Create a button for each available destination
+            // The button will display the destination name and the travel cost
             for (int i = 0; i < availableDestinations.Count; i++)
             {
                 Port dest = availableDestinations[i];
@@ -47,27 +52,40 @@ namespace StarSmuggler.Screens
             }
         }
 
-
+        // Refresh is called when the game state changes, such as when the player travels to a new port
+        // It reloads the travel buttons and their prices based on the current game state
         public void Refresh(ContentManager content)
         {
-            // Reload whatever content depends on game state
             GenerateTravelButtons(graphicsDevice, content);
         }
 
+        // LoadContent is called when the screen is first loaded
+        // It loads the necessary content such as textures and fonts
         public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
         {
-            this.graphicsDevice = graphicsDevice; // Cache for refresh use
-            font = content.Load<SpriteFont>("Fonts/Default");
+            // Load the click sound effect for use later
+            Game1.AudioManager.LoadSfx("click");
+
+            // Cache for refresh use
+            this.graphicsDevice = graphicsDevice;
+
+            // Load the background texture, font, and button texture 
+            font = content.Load<SpriteFont>("Fonts/Terminal");
             buttonTexture = content.Load<Texture2D>("UI/button");
             backgroundTexture = content.Load<Texture2D>("UI/cockpit");
 
-            Game1.AudioManager.LoadSfx("click");
-
+            // Define the back button
+            backButton = new BackButton(font, buttonTexture, 700, 650, 200, 50);
+            
+            // Generate the travel buttons based on the current game state
             GenerateTravelButtons(graphicsDevice, content);
         }
 
+        // Update is called every frame to update the state of the screen
+        // It checks for mouse/button clicks and updates the game state accordingly
         public void Update(GameTime gameTime)
         {
+            backButton.Update(gameTime);
             for (int i = 0; i < travelButtons.Count; i++)
             {
                 travelButtons[i].Update(gameTime);
@@ -83,6 +101,8 @@ namespace StarSmuggler.Screens
             }
         }
 
+        // Draw is called every frame to render the screen
+        // It draws the background, buttons, and any other UI elements
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
@@ -93,15 +113,8 @@ namespace StarSmuggler.Screens
             {
                 button.Draw(spriteBatch);
             }
-
+            backButton.Draw(spriteBatch);
             spriteBatch.End();
         }
-
-        // private int GetTravelCost(Port from, Port to)
-        // {
-        //     // Basic cost system based on zone distance
-        //     int zoneDifference = System.Math.Abs((int)from.Zone - (int)to.Zone);
-        //     return 50 + (zoneDifference * 100); // e.g., Inner → Outer = +100, Inner → Fringe = +200
-        // }
     }
 }

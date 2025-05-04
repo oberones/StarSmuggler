@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Content;
 using StarSmuggler.UI;
 using StarSmuggler.Events;
@@ -13,26 +14,34 @@ namespace StarSmuggler.Screens
     {
         private SpriteFont font;
         private Texture2D backgroundTexture;
+        private Song currentSong;
         private string portName;
         private string portDescription;
-        // private Rectangle continueButtonRect;
         private Texture2D buttonTexture;
         private Texture2D terminalTexture;
         private Terminal terminalWindow;
         private Button continueButton;
-
-        // Make terminalX and terminalY private fields
         private int terminalX;
         private int terminalY;
-        // private MouseState previousMouseState;
  
+         public void Refresh(ContentManager content)
+        {
+            // Reload whatever content depends on game state
+            var currentPort = GameManager.Instance.CurrentPort;
+            portDescription = currentPort.Description;
+            portName = currentPort.Name;
+            backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
+            currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
+        }
+
         public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
         {
             var currentPort = GameManager.Instance.CurrentPort;
             Console.WriteLine($"Loading port: {currentPort.Name}");
             portName = currentPort.Name;
             portDescription = currentPort.Description;
-            
+            currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
+            Game1.AudioManager.PlaySong(currentPort.MusicTrackName);
             backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             Game1.AudioManager.LoadSfx("click");
             font = content.Load<SpriteFont>("Fonts/Terminal");
@@ -51,8 +60,8 @@ namespace StarSmuggler.Screens
             continueButton = new Button(new Rectangle(buttonX, buttonY, buttonWidth, 50), "Continue", font, buttonTexture);
             
 
-            int terminalWidth = 600; // Width of the Terminal
-            int terminalHeight = 602; // Height of the Terminal
+            int terminalWidth = 800; // Width of the Terminal
+            int terminalHeight = 802; // Height of the Terminal
 
             terminalX = (screenWidth - terminalWidth) / 2;
             terminalY = (screenHeight - terminalHeight) / 2;
@@ -75,7 +84,6 @@ namespace StarSmuggler.Screens
         {
 
             spriteBatch.Begin();
-
             int xOffset = terminalX + 75;
             int yOffset = terminalY + 75;;
             spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
@@ -83,8 +91,6 @@ namespace StarSmuggler.Screens
             spriteBatch.DrawString(font, $"Welcome to: {portName}", new Vector2(xOffset, yOffset), Color.Green);
             string wrappedPortDesc = WrapText(font, portDescription, terminalWindow.Bounds.Width - 20); // Add padding
             spriteBatch.DrawString(font, wrappedPortDesc, new Vector2(xOffset, yOffset + 30), Color.Green);
-
-            // spriteBatch.Draw(buttonTexture, continueButtonRect, Color.White);
             continueButton.Draw(spriteBatch);
 
             if (GameManager.Instance.GetLastEvent() is GameEvent evt)
@@ -97,17 +103,7 @@ namespace StarSmuggler.Screens
             spriteBatch.End();
         }
 
-        public void Refresh(ContentManager content)
-        {
-            // Reload whatever content depends on game state
 
-            var currentPort = GameManager.Instance.CurrentPort;
-            portDescription = currentPort.Description;
-            portName = currentPort.Name;
-
-            // Optional: re-roll event text or background
-            backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
-        }
 
         // Helper method to wrap text
         private string WrapText(SpriteFont spriteFont, string text, float maxLineWidth)
