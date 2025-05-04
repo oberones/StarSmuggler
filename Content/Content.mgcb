@@ -20,6 +20,34 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/Default.spritefont
 
+#begin Fonts/Terminal.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Terminal.spritefont
+
+#begin Fonts/Terminal12.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Terminal12.spritefont
+
+#begin Fonts/Terminal16.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Terminal16.spritefont
+
+#begin Fonts/TerminalBold.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/TerminalBold.spritefont
+
 #begin FX/click.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

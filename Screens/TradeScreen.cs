@@ -10,7 +10,8 @@ namespace StarSmuggler.Screens
 {
     public class TradeScreen : IScreen
     {
-        private SpriteFont font;
+        private SpriteFont buttonFont;
+        private SpriteFont textFont;
         private Texture2D buttonTexture;
         private Texture2D terminalButtonTexture;
 
@@ -24,7 +25,7 @@ namespace StarSmuggler.Screens
         private List<NumericInput> numericInputs;
 
         private int spacingY = 80;
-        private int baseY = 100;
+        private int baseY = 120;
 
 
         public void Refresh(ContentManager content)
@@ -34,7 +35,8 @@ namespace StarSmuggler.Screens
 
         public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
         {
-            font = content.Load<SpriteFont>("Fonts/Default");
+            buttonFont = content.Load<SpriteFont>("Fonts/Terminal");
+            textFont = content.Load<SpriteFont>("Fonts/Terminal16");
             buttonTexture = content.Load<Texture2D>("UI/button");
             terminalButtonTexture = content.Load<Texture2D>("UI/terminalButton");
             terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
@@ -63,13 +65,13 @@ namespace StarSmuggler.Screens
             {
                 int y = baseY + i * spacingY;
 
-                buyButtons.Add(new Button(new Rectangle(600, y, 80, 40), "Buy", font, buttonTexture));
-                sellButtons.Add(new Button(new Rectangle(700, y, 80, 40), "Sell", font, buttonTexture));
+                buyButtons.Add(new Button(new Rectangle(600, y, 0, 40), "Buy", buttonFont, buttonTexture));
+                sellButtons.Add(new Button(new Rectangle(700, y, 80, 40), "Sell", buttonFont, buttonTexture));
 
-                var inputRect = new Rectangle(500, y, 80, 40);
-                numericInputs.Add(new NumericInput(inputRect, font, buttonTexture));
+                var inputRect = new Rectangle(500, y-60, 80, 40);
+                numericInputs.Add(new NumericInput(inputRect, buttonFont, buttonTexture));
             }
-            doneButton = new Button(new Rectangle(1078, 670, 100, 51), "Done", font, terminalButtonTexture, Color.White);
+            doneButton = new Button(new Rectangle(1078, 670, 100, 51), "Done", buttonFont, terminalButtonTexture, Color.White);
         }
 
         public void Update(GameTime gameTime)
@@ -134,28 +136,28 @@ namespace StarSmuggler.Screens
 
             // Offset all items to be relative to the terminal window's bounds + padding
             int terminalX = terminalWindow.Bounds.X + 100; // Padding from the left edge
-            int terminalY = terminalWindow.Bounds.Y + 100; // Padding from the top edge
+            int terminalY = terminalWindow.Bounds.Y + 80; // Padding from the top edge
 
-                // Draw the player's credits inside the terminal
+            // Draw the player's credits inside the terminal
             spriteBatch.DrawString(
-                font, 
+                buttonFont, 
                 $"Credits: {GameManager.Instance.Player.Credits}", 
-                new Vector2(terminalX + 20, terminalY + 20), // Offset relative to the terminal
+                new Vector2(terminalX + 150, terminalY + 645), // Offset relative to the terminal
                 Color.White
             );
 
             // Draw goods, buttons, and numeric inputs inside the terminal
             for (int i = 0; i < goods.Count; i++)
             {
-                int y = terminalY + 60 + i * spacingY; // Offset Y relative to the terminal
+                int y = terminalY + 32 + i * spacingY; // Offset Y relative to the terminal
 
                 var good = goods[i];
                 int ownedQty = GameManager.Instance.Player.CargoHold.ContainsKey(good) ? GameManager.Instance.Player.CargoHold[good] : 0;
                 int qty = numericInputs[i].Value;
 
                 // Draw the good's information
-                string line = $"{good.Name} - ${good.BasePrice} | Owned: {ownedQty} | Qty: {qty}";
-                spriteBatch.DrawString(font, line, new Vector2(terminalX + 20, y), Color.LightGray);
+                string line = $"{good.Name} - ${good.BasePrice} | Owned: {ownedQty}";
+                spriteBatch.DrawString(textFont, line, new Vector2(terminalX + 20, y), Color.LightGray);
 
                 // Draw numeric input, buy button, and sell button relative to the terminal
                 numericInputs[i].Bounds = new Rectangle(terminalX + 400, y, 80, 40); // Selected value

@@ -35,7 +35,7 @@ namespace StarSmuggler.Screens
             
             backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             Game1.AudioManager.LoadSfx("click");
-            font = content.Load<SpriteFont>("Fonts/Default");
+            font = content.Load<SpriteFont>("Fonts/Terminal");
             buttonTexture = content.Load<Texture2D>("UI/button");  // Placeholder button image
             terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
             // Calculate the center position for the Terminal

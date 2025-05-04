@@ -16,7 +16,7 @@ namespace StarSmuggler
                 new Good("Neurodust", "Hallucinogenic powder with precognition effects.", GoodRarity.MidTier, 150),
                 new Good("Void Silk", "Luxury zero-G fabric harvested from orbital spiders.", GoodRarity.MidTier, 220),
                 new Good("Quantum Seeds", "Encrypted gene seeds for forbidden crops.", GoodRarity.MidTier, 280),
-                new Good("Subconscious Implants", "Black-market dream recorders and enhancers.", GoodRarity.MidTier, 320),
+                new Good("Neural Implants", "Black-market dream recorders and enhancers.", GoodRarity.MidTier, 320),
                 new Good("Enceladite", "Highly unstable energy ore from Enceladus.", GoodRarity.Exotic, 800),
                 new Good("Cryobloom Spores", "Bioluminescent Europa spores with medicinal uses.", GoodRarity.Exotic, 950),
                 new Good("Temporal Relics", "Artifacts with rumored time-warping properties.", GoodRarity.Exotic, 1200),
