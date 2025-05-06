@@ -1,23 +1,24 @@
-// Define the Good class and its properties. What does it MEAN to be a good?
+using System;
 
 namespace StarSmuggler {
-    
-    // Define global references to the rarity properties of goods
-    public enum GoodRarity
+
+    public enum ItemRarity
     {
         Common,
         MidTier,
         Exotic
     }
-    public class Good
+    public class Item
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public GoodRarity Rarity { get; set; }
+        public ItemRarity Rarity { get; set; }
         public int BasePrice { get; set; }
 
-        public Good(string name, string description, GoodRarity rarity, int basePrice)
+        public Item(string id, string name, string description, ItemRarity rarity, int basePrice)
         {
+            Id = id;
             Name = name;
             Description = description;
             Rarity = rarity;

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Security;
 using StarSmuggler.Events;
+
 
 namespace StarSmuggler
 {
@@ -11,12 +14,10 @@ namespace StarSmuggler
         public PlayerData Player { get; private set; }
         public GameState CurrentState { get; private set; }
         public Port CurrentPort => Player.CurrentPort;
+        public Dictionary<string, Dictionary<string, int>> CurrentPrices => Player.CurrentPrices;
         private GameEvent lastEvent;
         private GameState? previousState;
-    
-
-
-        private GameManager() { }
+        public int JumpsSinceLastUpdate => Player.JumpsSinceLastUpdate;
 
         public void CheckForGameOver()
         {
@@ -29,12 +30,12 @@ namespace StarSmuggler
             // Try to find if cargo is sellable for enough to earn 50
             int potentialRevenue = 0;
 
-            foreach (var good in player.CargoHold)
+            foreach (var item in player.CargoHold)
             {
-                if (port.AvailableGoods.Contains(good.Key))
+                if (port.AvailableItems.Contains(item.Key))
                 {
-                    var marketPrice = port.AvailableGoods.Find(g => g == good.Key).BasePrice;
-                    potentialRevenue += good.Value * marketPrice;
+                    var marketPrice = port.AvailableItems.Find(g => g == item.Key).BasePrice;
+                    potentialRevenue += item.Value * marketPrice;
 
                     if (potentialRevenue >= 50)
                         return; // Can sell enough to continue
@@ -75,9 +76,9 @@ namespace StarSmuggler
 
                 foreach (var pair in data.CargoHold)
                 {
-                    var good = GoodsDatabase.AllGoods.Find(g => g.Name == pair.Key);
-                    if (good != null)
-                        Player.CargoHold[good] = pair.Value;
+                    var item = ItemsDatabase.AllItems.Find(g => g.Name == pair.Key);
+                    if (item != null)
+                        Player.CargoHold[item] = pair.Value;
                 }
 
                 LoadGoodsForCurrentPort();
@@ -94,8 +95,11 @@ namespace StarSmuggler
             var startingPort = PortsDatabase.GetRandomInnerPort();
             Player = new PlayerData(startingCredits: 500, cargoLimit: 30);
             Player.CurrentPort = startingPort;
+            Player.CurrentPrices = new Dictionary<string, Dictionary<string, int>>();
+            Player.JumpsSinceLastUpdate = 0;
+            UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
+            // DataManager.SaveGameData(DataManager.SavePath, GameData);
             LoadGoodsForCurrentPort();
-
             SetGameState(GameState.PortOverview); 
         }
 
@@ -110,8 +114,9 @@ namespace StarSmuggler
                 LoadGoodsForCurrentPort();
                 SetGameState(GameState.PortOverview); 
                 TriggerRandomEvent();
+                Player.JumpsSinceLastUpdate++;
                 SaveLoadManager.SaveGame(Player);
-                GameManager.Instance.CheckForGameOver();
+                Instance.CheckForGameOver();
                 // Autosave after successful travel
 
             }
@@ -124,31 +129,15 @@ namespace StarSmuggler
 
         public void LoadGoodsForCurrentPort()
         {
-            var available = GoodsDatabase.GetCommonAndMidTier(6);
+            var available = ItemsDatabase.GetCommonAndMidTier(6);
             Console.WriteLine($"GM Loading goods for port: {Player.CurrentPort.Name}");
             foreach (var good in available)
             {
                 Console.WriteLine($"Available Good: {good.Name}");
             }
-            Player.CurrentPort.AvailableGoods = available;
-            GenerateMarketPrices();
-        }
-
-        public void GenerateMarketPrices()
-        {
-            Console.WriteLine($"GM Generating market prices for port: {Player.CurrentPort.Name}");
-            Player.CurrentPort.CurrentPrices.Clear();
-            
-            foreach (var good in Player.CurrentPort.AvailableGoods)
-            {
-                // Allow +/- 30% price swing
-                Console.WriteLine($"GM Generating market prices for : {good.Name}");
-                float variance = 0.3f;
-                float multiplier = 1f + RandomHelper.Range(-variance, variance);
-                int newPrice = (int)MathF.Max(1, good.BasePrice * multiplier);
-
-                Player.CurrentPort.CurrentPrices[good] = newPrice;
-            }
+            Player.CurrentPort.AvailableItems = available;
+            Player.CurrentPort.Prices = CurrentPrices[Player.CurrentPort.Id];
+            // GenerateMarketPrices();
         }
 
         public static class RandomHelper
@@ -193,6 +182,34 @@ namespace StarSmuggler
             {
                 SetGameState(previousState.Value);
                 previousState = null;
+            }
+        }
+
+        public void UpdatePrices(List<Port> ports, List<Item> items)
+        {
+            var rng = new Random();
+            if ((JumpsSinceLastUpdate > 3) || JumpsSinceLastUpdate == 0)
+            {
+                Console.WriteLine("Updating prices due to enough jumps since last update.");
+                foreach (var port in ports)
+                {
+                    if (!CurrentPrices.ContainsKey(port.Id))
+                    {
+                        CurrentPrices[port.Id] = new Dictionary<string, int>();
+                    }
+                    foreach (var item in items)
+                    {
+                        float variance = 0.3f;
+                        float multiplier = 1f + ((float)(rng.NextDouble() * 2 - 1) * variance);
+                        int price = Math.Max(1, (int)(item.BasePrice * multiplier));
+                        CurrentPrices[port.Id][item.Id] = price;
+                        Console.WriteLine($"Updated price for {item.Name} at {port.Name}: {price} credits");
+                    }
+                }
+                Player.JumpsSinceLastUpdate = 0; // Reset jump counter after updating prices
+            } else {
+                Console.WriteLine("Skipping price update due to insufficient jumps since last update.");
+                return;
             }
         }
     }

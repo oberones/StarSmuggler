@@ -17,9 +17,9 @@ namespace StarSmuggler.Events
 
             new GameEvent(
                 "Merchant Strike",
-                "Local vendors are striking! Prices for goods have doubled temporarily.",
+                "Local vendors are striking! Prices for Items have doubled temporarily.",
                 (player, port) => {
-                    foreach (var g in port.AvailableGoods)
+                    foreach (var g in port.AvailableItems)
                         g.BasePrice *= 2;
                 }),
 
@@ -27,11 +27,11 @@ namespace StarSmuggler.Events
                 "Market Glut",
                 "A recent cargo drop flooded the market. Prices for one item have plummeted.",
                 (player, port) => {
-                    if (port.AvailableGoods.Count > 0)
+                    if (port.AvailableItems.Count > 0)
                     {
                         var rng = new Random();
-                        var index = rng.Next(port.AvailableGoods.Count);
-                        port.AvailableGoods[index].BasePrice /= 2;
+                        var index = rng.Next(port.AvailableItems.Count);
+                        port.AvailableItems[index].BasePrice /= 2;
                     }
                 }),
 
@@ -39,14 +39,14 @@ namespace StarSmuggler.Events
                 "Lost Cargo",
                 "A smuggler accidentally opened your cargo bay. You lose 1 item at random.",
                 (player, port) => {
-                    var keys = new List<Good>(player.CargoHold.Keys);
+                    var keys = new List<Item>(player.CargoHold.Keys);
                     if (keys.Count > 0)
                     {
                         var rng = new Random();
-                        var randomGood = keys[rng.Next(keys.Count)];
-                        player.CargoHold[randomGood] = Math.Max(0, player.CargoHold[randomGood] - 1);
-                        if (player.CargoHold[randomGood] == 0)
-                            player.CargoHold.Remove(randomGood);
+                        var randomItem = keys[rng.Next(keys.Count)];
+                        player.CargoHold[randomItem] = Math.Max(0, player.CargoHold[randomItem] - 1);
+                        if (player.CargoHold[randomItem] == 0)
+                            player.CargoHold.Remove(randomItem);
                     }
                 }),
         };
