@@ -17,9 +17,6 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    // PortOverviewScreen portOverviewScreen;
-    // TradeScreen tradeScreen;
-    // TravelScreen travelScreen;
     ScreenManager screenManager;
     
     public Game1()

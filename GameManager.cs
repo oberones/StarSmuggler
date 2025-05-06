@@ -13,9 +13,6 @@ namespace StarSmuggler
         public Port CurrentPort => Player.CurrentPort;
         private GameEvent lastEvent;
         private GameState? previousState;
-    
-
-
         private GameManager() { }
 
         public void CheckForGameOver()
@@ -29,12 +26,12 @@ namespace StarSmuggler
             // Try to find if cargo is sellable for enough to earn 50
             int potentialRevenue = 0;
 
-            foreach (var good in player.CargoHold)
+            foreach (var item in player.CargoHold)
             {
-                if (port.AvailableGoods.Contains(good.Key))
+                if (port.AvailableItems.Contains(item.Key))
                 {
-                    var marketPrice = port.AvailableGoods.Find(g => g == good.Key).BasePrice;
-                    potentialRevenue += good.Value * marketPrice;
+                    var marketPrice = port.AvailableItems.Find(g => g == item.Key).BasePrice;
+                    potentialRevenue += item.Value * marketPrice;
 
                     if (potentialRevenue >= 50)
                         return; // Can sell enough to continue
@@ -75,9 +72,9 @@ namespace StarSmuggler
 
                 foreach (var pair in data.CargoHold)
                 {
-                    var good = GoodsDatabase.AllGoods.Find(g => g.Name == pair.Key);
-                    if (good != null)
-                        Player.CargoHold[good] = pair.Value;
+                    var item = ItemsDatabase.AllItems.Find(g => g.Name == pair.Key);
+                    if (item != null)
+                        Player.CargoHold[item] = pair.Value;
                 }
 
                 LoadGoodsForCurrentPort();
@@ -124,30 +121,30 @@ namespace StarSmuggler
 
         public void LoadGoodsForCurrentPort()
         {
-            var available = GoodsDatabase.GetCommonAndMidTier(6);
+            var available = ItemsDatabase.GetCommonAndMidTier(6);
             Console.WriteLine($"GM Loading goods for port: {Player.CurrentPort.Name}");
             foreach (var good in available)
             {
                 Console.WriteLine($"Available Good: {good.Name}");
             }
-            Player.CurrentPort.AvailableGoods = available;
+            Player.CurrentPort.AvailableItems = available;
             GenerateMarketPrices();
         }
 
         public void GenerateMarketPrices()
         {
-            Console.WriteLine($"GM Generating market prices for port: {Player.CurrentPort.Name}");
+            Console.WriteLine($"Generating market prices for port: {Player.CurrentPort.Name}");
             Player.CurrentPort.CurrentPrices.Clear();
             
-            foreach (var good in Player.CurrentPort.AvailableGoods)
+            foreach (var item in Player.CurrentPort.AvailableItems)
             {
                 // Allow +/- 30% price swing
-                Console.WriteLine($"GM Generating market prices for : {good.Name}");
+                Console.WriteLine($"Generating market prices for : {item.Name}");
                 float variance = 0.3f;
                 float multiplier = 1f + RandomHelper.Range(-variance, variance);
-                int newPrice = (int)MathF.Max(1, good.BasePrice * multiplier);
+                int newPrice = (int)MathF.Max(1, item.BasePrice * multiplier);
 
-                Player.CurrentPort.CurrentPrices[good] = newPrice;
+                Player.CurrentPort.CurrentPrices[item] = newPrice;
             }
         }
 

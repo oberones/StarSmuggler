@@ -5,7 +5,7 @@ namespace StarSmuggler {
     public class PlayerData
     {
         public int Credits { get; set; }
-        public Dictionary<Good, int> CargoHold { get; set; }
+        public Dictionary<Item, int> CargoHold { get; set; }
         public int CargoLimit { get; set; }
         public Port CurrentPort { get; set; }
 
@@ -13,7 +13,7 @@ namespace StarSmuggler {
         {
             Credits = startingCredits;
             CargoLimit = cargoLimit;
-            CargoHold = new Dictionary<Good, int>();
+            CargoHold = new Dictionary<Item, int>();
         }
 
         public int GetCurrentCargoLoad()

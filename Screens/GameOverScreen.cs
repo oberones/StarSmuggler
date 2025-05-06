@@ -53,10 +53,10 @@ namespace StarSmuggler.Screens
             int cargoValue = 0;
             foreach (var pair in player.CargoHold)
             {
-                var matchingGood = port.AvailableGoods.Find(g => g == pair.Key);
-                if (matchingGood != null)
+                var matchingItem = port.AvailableItems.Find(g => g == pair.Key);
+                if (matchingItem != null)
                 {
-                    cargoValue += pair.Value * matchingGood.BasePrice;
+                    cargoValue += pair.Value * matchingItem.BasePrice;
                 }
             }
 

@@ -17,7 +17,7 @@ namespace StarSmuggler.Screens
         private Texture2D buttonTexture;
         private Texture2D terminalButtonTexture;
 
-        private List<Good> goods;
+        private List<Item> items;
         private List<Button> buyButtons;
         private List<Button> sellButtons;
 
@@ -34,7 +34,7 @@ namespace StarSmuggler.Screens
         public void Refresh(ContentManager content)
         {
             currentPort = GameManager.Instance.CurrentPort;
-            goods = GameManager.Instance.CurrentPort.AvailableGoods;
+            items = GameManager.Instance.CurrentPort.AvailableItems;
         }
 
         public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
@@ -47,11 +47,10 @@ namespace StarSmuggler.Screens
             terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
 
             currentPort = GameManager.Instance.CurrentPort;
-            goods = currentPort.AvailableGoods;
+            items = currentPort.AvailableItems;
 
             buyButtons = new List<Button>();
             sellButtons = new List<Button>();
-            // int doneButtonY = baseY + goods.Count * spacingY + 40;
             
             // Calculate the center position for the Terminal
             int screenWidth = graphicsDevice.Viewport.Width;
@@ -66,7 +65,7 @@ namespace StarSmuggler.Screens
 
             numericInputs = new List<NumericInput>();
 
-            for (int i = 0; i < goods.Count; i++)
+            for (int i = 0; i < items.Count; i++)
             {
                 int y = baseY + i * spacingY;
 
@@ -83,19 +82,19 @@ namespace StarSmuggler.Screens
         public void Update(GameTime gameTime)
         {
             backButton.Update(gameTime);
-            for (int i = 0; i < goods.Count; i++)
+            for (int i = 0; i < items.Count; i++)
             {
                 buyButtons[i].Update(gameTime);
                 sellButtons[i].Update(gameTime);
                 doneButton.Update(gameTime);
 
-                var good = goods[i];
+                var item = items[i];
                 numericInputs[i].Update(gameTime);
                 int quantity = numericInputs[i].Value;
                 var player = GameManager.Instance.Player;
 
-                int totalBuyCost = good.BasePrice * quantity;
-                int ownedQty = player.CargoHold.ContainsKey(good) ? player.CargoHold[good] : 0;
+                int totalBuyCost = item.BasePrice * quantity;
+                int ownedQty = player.CargoHold.ContainsKey(item) ? player.CargoHold[item] : 0;
 
                 // Handle Buy
                 if (buyButtons[i].WasClicked)
@@ -104,9 +103,9 @@ namespace StarSmuggler.Screens
                     if (player.Credits >= totalBuyCost && player.CanAddCargo(quantity))
                     {
                         player.Credits -= totalBuyCost;
-                        if (!player.CargoHold.ContainsKey(good))
-                            player.CargoHold[good] = 0;
-                        player.CargoHold[good] += quantity;
+                        if (!player.CargoHold.ContainsKey(item))
+                            player.CargoHold[item] = 0;
+                        player.CargoHold[item] += quantity;
                     }
                 }
 
@@ -116,10 +115,10 @@ namespace StarSmuggler.Screens
                     Game1.AudioManager.PlaySfx("click");
                     if (ownedQty >= quantity)
                     {
-                        player.Credits += good.BasePrice * quantity;
-                        player.CargoHold[good] -= quantity;
-                        if (player.CargoHold[good] <= 0)
-                            player.CargoHold.Remove(good);
+                        player.Credits += item.BasePrice * quantity;
+                        player.CargoHold[item] -= quantity;
+                        if (player.CargoHold[item] <= 0)
+                            player.CargoHold.Remove(item);
                     }
                 }
 
@@ -154,18 +153,18 @@ namespace StarSmuggler.Screens
             );
 
             Console.WriteLine($"TS Drawing inventory prices for : {GameManager.Instance.CurrentPort.Name}");
-            // Draw goods, buttons, and numeric inputs inside the terminal
-            for (int i = 0; i < goods.Count; i++)
+            // Draw items, buttons, and numeric inputs inside the terminal
+            for (int i = 0; i < items.Count; i++)
             {
                 int y = terminalY + 25 + i * spacingY; // Offset Y relative to the terminal
 
-                var good = goods[i];
-                int ownedQty = GameManager.Instance.Player.CargoHold.ContainsKey(good) ? GameManager.Instance.Player.CargoHold[good] : 0;
+                var item = items[i];
+                int ownedQty = GameManager.Instance.Player.CargoHold.ContainsKey(item) ? GameManager.Instance.Player.CargoHold[item] : 0;
                 int qty = numericInputs[i].Value;
 
-                // Draw the good's information
-                var price = GameManager.Instance.CurrentPort.CurrentPrices[good];
-                string line = $"{good.Name} - ${price} | Owned: {ownedQty}";
+                // Draw the item's information
+                var price = GameManager.Instance.CurrentPort.CurrentPrices[item];
+                string line = $"{item.Name} - ${price} | Owned: {ownedQty}";
                 spriteBatch.DrawString(textFont, line, new Vector2(terminalX + 20, y), Color.LightGray);
 
                 // Draw numeric input, buy button, and sell button relative to the terminal
