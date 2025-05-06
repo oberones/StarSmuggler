@@ -26,6 +26,8 @@ namespace StarSmuggler.Screens
         private Terminal terminalWindow;
         private List<NumericInput> numericInputs;
         private Port currentPort;
+        // private CurrentPrices currentPrices;
+
 
         private int spacingY = 80;
         private int baseY = 150;
@@ -48,7 +50,6 @@ namespace StarSmuggler.Screens
 
             currentPort = GameManager.Instance.CurrentPort;
             items = currentPort.AvailableItems;
-
             buyButtons = new List<Button>();
             sellButtons = new List<Button>();
             
@@ -152,7 +153,7 @@ namespace StarSmuggler.Screens
                 Color.White
             );
 
-            Console.WriteLine($"TS Drawing inventory prices for : {GameManager.Instance.CurrentPort.Name}");
+            Console.WriteLine($"TS Drawing inventory prices for : {currentPort.Name}");
             // Draw items, buttons, and numeric inputs inside the terminal
             for (int i = 0; i < items.Count; i++)
             {
@@ -163,7 +164,8 @@ namespace StarSmuggler.Screens
                 int qty = numericInputs[i].Value;
 
                 // Draw the item's information
-                var price = GameManager.Instance.CurrentPort.CurrentPrices[item];
+                // var price = GameManager.Instance.CurrentPort.CurrentPrices[item];
+                var price = currentPort.Prices[item.Id];
                 string line = $"{item.Name} - ${price} | Owned: {ownedQty}";
                 spriteBatch.DrawString(textFont, line, new Vector2(terminalX + 20, y), Color.LightGray);
 

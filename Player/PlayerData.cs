@@ -8,6 +8,8 @@ namespace StarSmuggler {
         public Dictionary<Item, int> CargoHold { get; set; }
         public int CargoLimit { get; set; }
         public Port CurrentPort { get; set; }
+        public Dictionary<string, Dictionary<string, int>> CurrentPrices { get; set; }
+        public int JumpsSinceLastUpdate { get; set; } = 0;
 
         public PlayerData(int startingCredits, int cargoLimit)
         {

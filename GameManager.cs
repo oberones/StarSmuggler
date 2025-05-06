@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Security;
 using StarSmuggler.Events;
+
 
 namespace StarSmuggler
 {
@@ -11,9 +14,11 @@ namespace StarSmuggler
         public PlayerData Player { get; private set; }
         public GameState CurrentState { get; private set; }
         public Port CurrentPort => Player.CurrentPort;
+        public Dictionary<string, Dictionary<string, int>> CurrentPrices => Player.CurrentPrices;
         private GameEvent lastEvent;
         private GameState? previousState;
         private GameManager() { }
+        public int JumpsSinceLastUpdate => Player.JumpsSinceLastUpdate;
 
         public void CheckForGameOver()
         {
@@ -91,8 +96,11 @@ namespace StarSmuggler
             var startingPort = PortsDatabase.GetRandomInnerPort();
             Player = new PlayerData(startingCredits: 500, cargoLimit: 30);
             Player.CurrentPort = startingPort;
+            Player.CurrentPrices = new Dictionary<string, Dictionary<string, int>>();
+            Player.JumpsSinceLastUpdate = 0;
+            UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
+            // DataManager.SaveGameData(DataManager.SavePath, GameData);
             LoadGoodsForCurrentPort();
-
             SetGameState(GameState.PortOverview); 
         }
 
@@ -105,11 +113,12 @@ namespace StarSmuggler
                 Player.CurrentPort = destination;
                 Console.WriteLine($"Destination port: {Player.CurrentPort.Name}");
                 LoadGoodsForCurrentPort();
+                Player.JumpsSinceLastUpdate++;
+                UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
                 SetGameState(GameState.PortOverview); 
                 TriggerRandomEvent();
                 SaveLoadManager.SaveGame(Player);
-                GameManager.Instance.CheckForGameOver();
-                // Autosave after successful travel
+                Instance.CheckForGameOver();
 
             }
             else
@@ -128,35 +137,18 @@ namespace StarSmuggler
                 Console.WriteLine($"Available Good: {good.Name}");
             }
             Player.CurrentPort.AvailableItems = available;
-            GenerateMarketPrices();
+            Player.CurrentPort.Prices = CurrentPrices[Player.CurrentPort.Id];
         }
 
-        public void GenerateMarketPrices()
-        {
-            Console.WriteLine($"Generating market prices for port: {Player.CurrentPort.Name}");
-            Player.CurrentPort.CurrentPrices.Clear();
-            
-            foreach (var item in Player.CurrentPort.AvailableItems)
-            {
-                // Allow +/- 30% price swing
-                Console.WriteLine($"Generating market prices for : {item.Name}");
-                float variance = 0.3f;
-                float multiplier = 1f + RandomHelper.Range(-variance, variance);
-                int newPrice = (int)MathF.Max(1, item.BasePrice * multiplier);
+        // public static class RandomHelper
+        // {
+        //     private static Random rng = new();
 
-                Player.CurrentPort.CurrentPrices[item] = newPrice;
-            }
-        }
-
-        public static class RandomHelper
-        {
-            private static Random rng = new();
-
-            public static float Range(float min, float max)
-            {
-                return (float)(min + rng.NextDouble() * (max - min));
-            }
-        }
+        //     public static float Range(float min, float max)
+        //     {
+        //         return (float)(min + rng.NextDouble() * (max - min));
+        //     }
+        // }
 
         public void SetGameState(GameState newState)
         {
@@ -190,6 +182,35 @@ namespace StarSmuggler
             {
                 SetGameState(previousState.Value);
                 previousState = null;
+            }
+        }
+
+        public void UpdatePrices(List<Port> ports, List<Item> items)
+        {
+            var rng = new Random();
+            if ((JumpsSinceLastUpdate > 3) || JumpsSinceLastUpdate == 0)
+            {
+                Console.WriteLine("Updating prices due to enough jumps since last update.");
+                foreach (var port in ports)
+                {
+                    if (!CurrentPrices.ContainsKey(port.Id))
+                    {
+                        CurrentPrices[port.Id] = new Dictionary<string, int>();
+                    }
+                    foreach (var item in items)
+                    {
+                        float variance = 0.3f;
+                        float multiplier = 1f + ((float)(rng.NextDouble() * 2 - 1) * variance);
+                        Console.WriteLine($"Base price for {item.Name} at {port.Name}: {item.BasePrice} credits, Multiplier: {multiplier}");
+                        int price = Math.Max(1, (int)(item.BasePrice * multiplier));
+                        CurrentPrices[port.Id][item.Id] = price;
+                        Console.WriteLine($"Updated price for {item.Name} at {port.Name}: {price} credits");
+                    }
+                }
+                Player.JumpsSinceLastUpdate = 0; // Reset jump counter after updating prices
+            } else {
+                Console.WriteLine("Skipping price update due to insufficient jumps since last update.");
+                return;
             }
         }
     }
