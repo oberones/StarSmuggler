@@ -46,7 +46,7 @@ namespace StarSmuggler.Screens
             Game1.AudioManager.LoadSfx("click");
             font = content.Load<SpriteFont>("Fonts/Terminal");
             buttonTexture = content.Load<Texture2D>("UI/button");  // Placeholder button image
-            terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
+            terminalTexture = content.Load<Texture2D>("UI/terminalEmptyNew"); 
             // Calculate the center position for the Terminal
             int screenWidth = graphicsDevice.Viewport.Width;
             int screenHeight = graphicsDevice.Viewport.Height;
