@@ -140,16 +140,6 @@ namespace StarSmuggler
             Player.CurrentPort.Prices = CurrentPrices[Player.CurrentPort.Id];
         }
 
-        // public static class RandomHelper
-        // {
-        //     private static Random rng = new();
-
-        //     public static float Range(float min, float max)
-        //     {
-        //         return (float)(min + rng.NextDouble() * (max - min));
-        //     }
-        // }
-
         public void SetGameState(GameState newState)
         {
             if (CurrentState != GameState.MainMenu)
@@ -163,6 +153,11 @@ namespace StarSmuggler
         private void TriggerRandomEvent()
         {
             var rng = new Random();
+            rng.Next(1, 100);
+            if (rng.Next(1, 100) > 75) // 25% chance to trigger an event
+            {
+                return; // No event triggered
+            }
             lastEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
             lastEvent.Execute(Player, Player.CurrentPort);
         }

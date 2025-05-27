@@ -17,10 +17,10 @@ namespace StarSmuggler.Events
 
             new GameEvent(
                 "Merchant Strike",
-                "Local vendors are striking! Prices for Items have doubled temporarily.",
+                "Local vendors are striking! Prices for all items have doubled temporarily.",
                 (player, port) => {
                     foreach (var g in port.AvailableItems)
-                        g.BasePrice *= 2;
+                        port.Prices[g.Id] *= 2;
                 }),
 
             new GameEvent(
@@ -31,7 +31,7 @@ namespace StarSmuggler.Events
                     {
                         var rng = new Random();
                         var index = rng.Next(port.AvailableItems.Count);
-                        port.AvailableItems[index].BasePrice /= 2;
+                        port.Prices[port.AvailableItems[index].Id] /= 2;
                     }
                 }),
 

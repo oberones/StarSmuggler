@@ -46,7 +46,7 @@ namespace StarSmuggler.Screens
             textFont = content.Load<SpriteFont>("Fonts/Terminal16");
             buttonTexture = content.Load<Texture2D>("UI/button");
             terminalButtonTexture = content.Load<Texture2D>("UI/terminalButton");
-            terminalTexture = content.Load<Texture2D>("UI/terminalEmpty"); 
+            terminalTexture = content.Load<Texture2D>("UI/terminalEmptyNew"); 
 
             currentPort = GameManager.Instance.CurrentPort;
             items = currentPort.AvailableItems;
