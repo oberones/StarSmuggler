@@ -42,7 +42,7 @@ namespace StarSmuggler.Screens
             }
 
             spriteBatch.DrawString(font, "Game Over", new Vector2(550, 300), Color.Red);
-            spriteBatch.DrawString(font, "Press Enter to start a new game", new Vector2(430, 360), Color.White);
+            spriteBatch.DrawString(font, "Press Escape for the main menu", new Vector2(430, 360), Color.White);
             spriteBatch.End();
         }
 
