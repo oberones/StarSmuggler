@@ -154,7 +154,7 @@ namespace StarSmuggler
         {
             var rng = new Random();
             rng.Next(1, 100);
-            if (rng.Next(1, 100) > 75) // 25% chance to trigger an event
+            if (rng.Next(1, 100) > 25) // 25% chance to trigger an event
                 return; // No event triggered
             lastEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
             lastEvent.Execute(Player, Player.CurrentPort);
