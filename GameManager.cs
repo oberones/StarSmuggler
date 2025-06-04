@@ -15,7 +15,6 @@ namespace StarSmuggler
         public GameState CurrentState { get; private set; }
         public Port CurrentPort => Player.CurrentPort;
         public Dictionary<string, Dictionary<string, int>> CurrentPrices => Player.CurrentPrices;
-        private GameEvent lastEvent;
         private GameState? previousState;
         private GameManager() { }
         public int JumpsSinceLastUpdate => Player.JumpsSinceLastUpdate;
@@ -103,10 +102,7 @@ namespace StarSmuggler
             var startingPort = PortsDatabase.GetRandomInnerPort();
             Player = new PlayerData(startingCredits: 500, cargoLimit: 30);
             Player.CurrentPort = startingPort;
-            Player.CurrentPrices = new Dictionary<string, Dictionary<string, int>>();
-            Player.JumpsSinceLastUpdate = 0;
             UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
-            // DataManager.SaveGameData(DataManager.SavePath, GameData);
             LoadGoodsForCurrentPort();
             SetGameState(GameState.PortOverview); 
         }
@@ -174,17 +170,19 @@ namespace StarSmuggler
         {
             var rng = new Random();
             rng.Next(1, 100);
-            if (rng.Next(1, 100) > 25) // 25% chance to trigger an event
+            if (rng.Next(1, 100) >= 25) {// 25% chance to trigger an event
+                Player.CurrentEvent = null; // No event triggered
                 return; // No event triggered
-            lastEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
-            lastEvent.Execute(Player, Player.CurrentPort);
+            }
+            Player.CurrentEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
+            Player.CurrentEvent.Execute(Player);
         }
         
         // Get the last triggered event
         // This can be used to display event details in the UI or log
         public GameEvent GetLastEvent()
         {
-            return lastEvent;
+            return Player.CurrentEvent;
         }
 
         // Check if there is a previous game state to return to
