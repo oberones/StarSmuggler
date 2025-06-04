@@ -21,7 +21,8 @@ namespace StarSmuggler
                 CurrentPortName = player.CurrentPort.Name,
                 Credits = player.Credits,
                 CargoLimit = player.CargoLimit,
-                CargoHold = new Dictionary<string, int>()
+                CargoHold = new Dictionary<string, int>(),
+                Prices = player.CurrentPrices
             };
 
             foreach (var item in player.CargoHold)

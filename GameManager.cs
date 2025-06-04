@@ -74,6 +74,7 @@ namespace StarSmuggler
                 if (port == null) port = PortsDatabase.GetRandomInnerPort();
 
                 Player.CurrentPort = port;
+                Player.CurrentPrices = data.Prices;
 
                 foreach (var pair in data.CargoHold)
                 {
@@ -147,7 +148,6 @@ namespace StarSmuggler
             CurrentState = newState;
             if (Game1.ScreenManagerRef != null)
                 Game1.ScreenManagerRef.SetActive(newState);
-                // SaveLoadManager.SaveGame(Player);
         }
 
         private void TriggerRandomEvent()
@@ -155,9 +155,7 @@ namespace StarSmuggler
             var rng = new Random();
             rng.Next(1, 100);
             if (rng.Next(1, 100) > 75) // 25% chance to trigger an event
-            {
                 return; // No event triggered
-            }
             lastEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
             lastEvent.Execute(Player, Player.CurrentPort);
         }
@@ -189,9 +187,7 @@ namespace StarSmuggler
                 foreach (var port in ports)
                 {
                     if (!CurrentPrices.ContainsKey(port.Id))
-                    {
                         CurrentPrices[port.Id] = new Dictionary<string, int>();
-                    }
                     foreach (var item in items)
                     {
                         float variance = 0.3f;
