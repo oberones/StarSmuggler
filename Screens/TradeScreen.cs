@@ -93,7 +93,7 @@ namespace StarSmuggler.Screens
                 int quantity = numericInputs[i].Value;
                 var player = GameManager.Instance.Player;
 
-                int totalBuyCost = item.BasePrice * quantity;
+                int totalBuyCost = currentPort.Prices[item.Id] * quantity;
                 int ownedQty = player.CargoHold.ContainsKey(item) ? player.CargoHold[item] : 0;
 
                 // Handle Buy
@@ -115,7 +115,7 @@ namespace StarSmuggler.Screens
                     Game1.AudioManager.PlaySfx("click");
                     if (ownedQty >= quantity)
                     {
-                        player.Credits += item.BasePrice * quantity;
+                        player.Credits += currentPort.Prices[item.Id] * quantity;
                         player.CargoHold[item] -= quantity;
                         if (player.CargoHold[item] <= 0)
                             player.CargoHold.Remove(item);
