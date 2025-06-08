@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;   
 
 namespace StarSmuggler
 {
@@ -34,10 +35,69 @@ namespace StarSmuggler
             };
         }
 
-        public static List<Item> GetItemsByRarity(ItemRarity rarity)
+        // Returns a list of all items with the specified rarity
+        public static List<Item> GetItemsByRarity(ItemRarity rarity, int count = 0)
         {
-            return AllItems.FindAll(g => g.Rarity == rarity);
+            if (count <= 0 || count > AllItems.Count)
+            {
+                return AllItems.FindAll(g => g.Rarity == rarity);
+            }
+
+            var validItems = AllItems.FindAll(g => g.Rarity == rarity);
+            var rng = new System.Random();
+            var selected = new List<Item>();
+
+            while (selected.Count < count && validItems.Count > 0)
+            {
+                int index = rng.Next(validItems.Count);
+                selected.Add(validItems[index]);
+                validItems.RemoveAt(index);
+            }
+
+            return selected;
         }
+
+        // Returns a list of items available in the specified port zone
+        public static List<Item> GetZoneItems(PortZone zone, int count)
+        {
+            switch (zone)
+            {
+                case PortZone.Inner:
+                    return GetItemsByRarity(ItemRarity.Common, count);
+                case PortZone.Outer:
+                    return GetItemsByRarity(ItemRarity.MidTier, count);
+                case PortZone.Fringe:
+                    return GetItemsByRarity(ItemRarity.Exotic, count);
+                default:
+                    return GetItemsByRarity(ItemRarity.Common, count);
+            }
+        }
+
+        // Returns a list of items avilable at a zone other than the specified zone
+        public static List<Item> GetOtherZoneItems(PortZone excludedZone, int count)
+        {
+            var allItems = new List<Item>();
+            foreach (PortZone zone in Enum.GetValues(typeof(PortZone)))
+            {
+                if (zone != excludedZone)
+                {
+                    allItems.AddRange(GetZoneItems(zone, count));
+                }
+            }
+
+            // Shuffle the items and return the first 'count' items
+            var rng = new System.Random();
+            for (int i = allItems.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(i + 1);
+                var temp = allItems[i];
+                allItems[i] = allItems[j];
+                allItems[j] = temp;
+            }
+
+            return allItems.GetRange(0, Math.Min(count, allItems.Count));
+        }
+
 
         public static List<Item> GetCommonAndMidTier(int count)
         {
