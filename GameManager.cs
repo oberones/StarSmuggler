@@ -55,16 +55,48 @@ namespace StarSmuggler
             if (from == to)
                 return 0;
 
-            int baseCost = 50;
+            int baseCost = 10;
 
             // Add cost based on zone difference
             int zoneDiff = Math.Abs((int)from.Zone - (int)to.Zone);
-            int cost = baseCost + zoneDiff * 25;
+            int cost = baseCost + zoneDiff * 5;
 
             if (zoneDiff >= 2)
-                cost += 50;
+                cost += 10;
 
             return cost;
+        }
+
+        // Determine the markup based on the item's rarity and the port's zone. 
+        // Common items are cheaper in the inner ports, while exotic items are more expensive.
+        public float GetItemMarkup(Item item, Port port)
+        {
+            switch (item.Rarity)
+            {
+                case ItemRarity.Common:
+                    if (port.Zone == PortZone.Fringe)
+                        return 2;
+                    else if (port.Zone == PortZone.Outer)
+                        return 0.5f;
+                    else
+                        return 0;
+                case ItemRarity.MidTier:
+                    if (port.Zone == PortZone.Fringe)
+                        return 1;
+                    else if (port.Zone == PortZone.Outer)
+                        return 0;
+                    else
+                        return 0.5f;
+                case ItemRarity.Exotic:
+                    if (port.Zone == PortZone.Fringe)
+                        return 0;
+                    else if (port.Zone == PortZone.Outer)
+                        return 0.5f;
+                    else
+                        return 2f;
+                default:
+                    return 0;
+            }
         }
 
         // Load game data from save file or start a new game if no save exists
@@ -170,7 +202,7 @@ namespace StarSmuggler
         {
             var rng = new Random();
             rng.Next(1, 100);
-            if (rng.Next(1, 100) >= 25) {// 25% chance to trigger an event
+            if (rng.Next(1, 100) >= 30) {// 30% chance to trigger an event
                 Player.CurrentEvent = null; // No event triggered
                 return; // No event triggered
             }
@@ -216,8 +248,12 @@ namespace StarSmuggler
                         CurrentPrices[port.Id] = new Dictionary<string, int>();
                     foreach (var item in items)
                     {
+                        // The multiplier combines a random variance and a markup additively.
+                        // This design choice ensures that prices fluctuate dynamically while incorporating
+                        // a consistent markup based on the item's characteristics and the port's conditions.
                         float variance = 0.3f;
-                        float multiplier = 1f + ((float)(rng.NextDouble() * 2 - 1) * variance);
+                        float markup = GetItemMarkup(item, port);
+                        float multiplier = 1f + ((float)(rng.NextDouble() * 2 - 1) * variance) + markup;
                         Console.WriteLine($"Base price for {item.Name} at {port.Name}: {item.BasePrice} credits, Multiplier: {multiplier}");
                         int price = Math.Max(1, (int)(item.BasePrice * multiplier));
                         CurrentPrices[port.Id][item.Id] = price;
