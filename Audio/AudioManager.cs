@@ -21,7 +21,7 @@ namespace StarSmuggler.Audio
 
         // Sound effects
         private Dictionary<string, SoundEffect> soundEffects = new();
-        private float sfxVolume = 1.0f;
+        private float sfxVolume = 0.5f;
 
         public void Initialize(ContentManager contentManager)
         {
