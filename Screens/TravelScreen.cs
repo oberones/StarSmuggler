@@ -18,6 +18,7 @@ namespace StarSmuggler.Screens
         private Texture2D buttonTexture;
         private SpriteFont font;
         private GraphicsDevice graphicsDevice;
+        private Texture2D portTexture;
         private List<Button> travelButtons;
         private Terminal terminalWindow;
         private Texture2D terminalTexture;
@@ -77,7 +78,8 @@ namespace StarSmuggler.Screens
             font = content.Load<SpriteFont>("Fonts/Terminal");
             buttonTexture = content.Load<Texture2D>("UI/button");
             backgroundTexture = content.Load<Texture2D>("UI/cockpit");
-            terminalTexture = content.Load<Texture2D>("UI/terminalEmptyNew"); 
+            terminalTexture = content.Load<Texture2D>("UI/terminalTransparent");
+            portTexture = content.Load<Texture2D>("Ports/mercuryPreview"); // TODO: figure out how to load the correct port preview dynamically
             // Calculate the center position for the Terminal
             int screenWidth = graphicsDevice.Viewport.Width;
             int screenHeight = graphicsDevice.Viewport.Height;
@@ -91,8 +93,8 @@ namespace StarSmuggler.Screens
             // Define the back button
             backButton = new BackButton(font, buttonTexture, 700, 650, 200, 50);
             
-            // Generate the travel buttons based on the current game state
-            GenerateTravelButtons(graphicsDevice, content);
+            // // Generate the travel buttons based on the current game state
+            // GenerateTravelButtons(graphicsDevice, content);
         }
 
         // Update is called every frame to update the state of the screen
@@ -120,15 +122,21 @@ namespace StarSmuggler.Screens
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
+            // Draw the background texture
             spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            var previewHeight = terminalWindow.Bounds.Height - 350;
+            var ratio = (float)4 / 3; // Maintain a 4:3 aspect ratio for the preview
+            var previewWidth = Convert.ToInt32(previewHeight * ratio);
+            spriteBatch.Draw(portTexture, new Rectangle(terminalWindow.Bounds.X + 65, terminalWindow.Bounds.Y + 75, previewWidth, previewHeight), Color.White);
+            // Draw the terminal window (defined above)
             terminalWindow.Draw(spriteBatch);
-            spriteBatch.DrawString(font, $"Select Destination (Credits: {GameManager.Instance.Player.Credits})", new Vector2(50, 20), Color.White);
+            // spriteBatch.DrawString(font, $"Select Destination (Credits: {GameManager.Instance.Player.Credits})", new Vector2(50, 20), Color.White);
 
-            foreach (var button in travelButtons)
-            {
-                button.Draw(spriteBatch);
-            }
-            backButton.Draw(spriteBatch);
+            // foreach (var button in travelButtons)
+            // {
+            //     button.Draw(spriteBatch);
+            // }
+            // backButton.Draw(spriteBatch);
             spriteBatch.End();
         }
     }

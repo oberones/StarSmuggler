@@ -17,6 +17,7 @@ namespace StarSmuggler {
         public string Name { get; set; }
         public string Description { get; set; }
         public string BackgroundImagePath { get; set; }
+        public string PreviewImagePath { get; set; } // For the travel screen
         public string MusicTrackName { get; set; } // e.g. "venus_theme"
         public PortZone Zone { get; set; }
         
@@ -25,13 +26,14 @@ namespace StarSmuggler {
         // List of goods available at this port for the current visit
         public List<Item> AvailableItems { get; set; }
         
-        public Port(string id, string name, string description, PortZone zone, string backgroundImagePath, string musicTrackName = null)
+        public Port(string id, string name, string description, PortZone zone, string backgroundImagePath, string previewImagePath, string musicTrackName = null)
         {
             Id = id;
             Name = name;
             Description = description;
             Zone = zone;
             BackgroundImagePath = backgroundImagePath;
+            PreviewImagePath = previewImagePath;
             MusicTrackName = musicTrackName;
 
             // A list of items available at this port for the current visit
