@@ -55,14 +55,14 @@ namespace StarSmuggler
             if (from == to)
                 return 0;
 
-            int baseCost = 10;
+            int baseCost = 15;
 
             // Add cost based on zone difference
             int zoneDiff = Math.Abs((int)from.Zone - (int)to.Zone);
-            int cost = baseCost + zoneDiff * 5;
+            int cost = baseCost + zoneDiff * 2;
 
             if (zoneDiff >= 2)
-                cost += 10;
+                cost *= 2 ;
 
             return cost;
         }
@@ -177,7 +177,10 @@ namespace StarSmuggler
         // Load goods available at the current port and print them to the console
         public void LoadGoodsForCurrentPort()
         {
-            var available = ItemsDatabase.GetCommonAndMidTier(6);
+            var available = ItemsDatabase.GetZoneItems(Player.CurrentPort.Zone, 4);
+            var extraGoods = ItemsDatabase.GetOtherZoneItems(Player.CurrentPort.Zone, 2);
+            available.AddRange(extraGoods);
+            available.Sort((a, b) => a.Name.CompareTo(b.Name)); // Sort by name for consistency
             Console.WriteLine($"Loading goods for port: {Player.CurrentPort.Name}");
             foreach (var good in available)
             {

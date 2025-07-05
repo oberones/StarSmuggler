@@ -18,49 +18,26 @@ namespace StarSmuggler.Screens
         private Texture2D buttonTexture;
         private SpriteFont font;
         private GraphicsDevice graphicsDevice;
-        private List<Button> travelButtons;
+        private Texture2D portPreviewTexture;
         private Terminal terminalWindow;
         private Texture2D terminalTexture;
-
-
-
-        // GenerateTravelButtons is a helper function to create the travel buttons with as little code as possible
-        private void GenerateTravelButtons(GraphicsDevice graphics, ContentManager content)
-        {
-            // Get the current port and available destinations
-            Port currentPort = GameManager.Instance.CurrentPort;
-            availableDestinations = PortsDatabase.AllPorts
-                .Where(p => p != currentPort)
-                .ToList();
-
-            travelButtons = new List<Button>();
-
-            int screenWidth = graphics.Viewport.Width;
-            int buttonWidth = 500;
-            int startY = 100;
-            int spacingY = 70;
-
-            // Create a button for each available destination
-            // The button will display the destination name and the travel cost
-            for (int i = 0; i < availableDestinations.Count; i++)
-            {
-                Port dest = availableDestinations[i];
-                int travelCost = GameManager.Instance.GetTravelCost(currentPort, dest);
-                string label = $"{dest.Name} - ${travelCost}";
-
-                int buttonX = (screenWidth - buttonWidth) / 2;
-                Rectangle rect = new Rectangle(buttonX, startY + i * spacingY, buttonWidth, 50);
-
-                var button = new Button(rect, label, font, buttonTexture);
-                travelButtons.Add(button);
-            }
-        }
+        private Port selectedPort;
+        private Port currentPort;
+        private Button previousButton;
+        private Button nextButton;
+        private SpriteFont buttonFont;
+        private Texture2D terminalButtonTexture;
+        private Button travelButton;
 
         // Refresh is called when the game state changes, such as when the player travels to a new port
         // It reloads the travel buttons and their prices based on the current game state
         public void Refresh(ContentManager content)
         {
-            GenerateTravelButtons(graphicsDevice, content);
+            // Select a random inner port for the preview to start with
+            selectedPort = PortsDatabase.GetRandomInnerPort();
+            currentPort = GameManager.Instance.CurrentPort;
+            // Update the port texture based on the selected port
+            portPreviewTexture = content.Load<Texture2D>(selectedPort.PreviewImagePath);
         }
 
         // LoadContent is called when the screen is first loaded
@@ -72,12 +49,14 @@ namespace StarSmuggler.Screens
 
             // Cache for refresh use
             this.graphicsDevice = graphicsDevice;
-
+            buttonFont = content.Load<SpriteFont>("Fonts/Terminal");
             // Load the background texture, font, and button texture 
             font = content.Load<SpriteFont>("Fonts/Terminal");
             buttonTexture = content.Load<Texture2D>("UI/button");
             backgroundTexture = content.Load<Texture2D>("UI/cockpit");
-            terminalTexture = content.Load<Texture2D>("UI/terminalEmptyNew"); 
+            terminalTexture = content.Load<Texture2D>("UI/terminalTransparent");
+            terminalButtonTexture = content.Load<Texture2D>("UI/terminalButtonNew");
+            portPreviewTexture = content.Load<Texture2D>("Ports/mercuryPreview"); // TODO: figure out how to load the correct port preview dynamically
             // Calculate the center position for the Terminal
             int screenWidth = graphicsDevice.Viewport.Width;
             int screenHeight = graphicsDevice.Viewport.Height;
@@ -90,9 +69,17 @@ namespace StarSmuggler.Screens
             terminalWindow = new Terminal(new Rectangle(terminalX, terminalY, terminalWidth, terminalHeight), texture: terminalTexture);
             // Define the back button
             backButton = new BackButton(font, buttonTexture, 700, 650, 200, 50);
-            
-            // Generate the travel buttons based on the current game state
-            GenerateTravelButtons(graphicsDevice, content);
+
+            // // Generate the travel buttons based on the current game state
+            // GenerateTravelButtons(graphicsDevice, content);
+            previousButton = new Button(new Rectangle(960, 670, 100, 51), "Prev.", buttonFont, terminalButtonTexture, Color.White);
+            nextButton = new Button(new Rectangle(1075, 670, 100, 51), "Next", buttonFont, terminalButtonTexture, Color.White);
+            // Add Travel button inside the terminal window, below the port name/cost
+            int travelBtnWidth = 140;
+            int travelBtnHeight = 51;
+            int travelBtnX = terminalWindow.Bounds.X + 650;
+            int travelBtnY = terminalWindow.Bounds.Y + 725;
+            travelButton = new Button(new Rectangle(travelBtnX, travelBtnY, travelBtnWidth, travelBtnHeight), "Travel", buttonFont, terminalButtonTexture, Color.White);
         }
 
         // Update is called every frame to update the state of the screen
@@ -100,18 +87,38 @@ namespace StarSmuggler.Screens
         public void Update(GameTime gameTime)
         {
             backButton.Update(gameTime);
-            for (int i = 0; i < travelButtons.Count; i++)
+            previousButton.Update(gameTime);
+            nextButton.Update(gameTime);
+            travelButton.Update(gameTime);
+            // Check if the previous or next button was clicked
+            if (previousButton.WasClicked)
             {
-                travelButtons[i].Update(gameTime);
-
-                if (travelButtons[i].WasClicked)
+                Game1.AudioManager.PlaySfx("click");
+                // Select the previous port in the list
+                int currentIndex = PortsDatabase.AllPorts.IndexOf(selectedPort);
+                if (currentIndex > 0)
                 {
-                    Game1.AudioManager.PlaySfx("click");
-                    Port destination = availableDestinations[i];
-                    int cost = GameManager.Instance.GetTravelCost(GameManager.Instance.CurrentPort, destination);
-                    Console.WriteLine($"Travelling to destination port: {destination.Name}, Travel Cost: {cost}");
-                    GameManager.Instance.TravelToPort(destination, cost);
+                    selectedPort = PortsDatabase.AllPorts[currentIndex - 1];
+                    // previewTexture = Game1.Content.Load<Texture2D>(selectedPort.PreviewImagePath);
                 }
+            }
+            else if (nextButton.WasClicked)
+            {
+                Game1.AudioManager.PlaySfx("click");
+                // Select the next port in the list
+                int currentIndex = PortsDatabase.AllPorts.IndexOf(selectedPort);
+                if (currentIndex < PortsDatabase.AllPorts.Count - 1)
+                {
+                    selectedPort = PortsDatabase.AllPorts[currentIndex + 1];
+                    // previewTexture = Game1.Content.Load<Texture2D>(selectedPort.PreviewImagePath);
+                }
+            }
+            else if (travelButton.WasClicked)
+            {
+                Game1.AudioManager.PlaySfx("click");
+                int cost = GameManager.Instance.GetTravelCost(currentPort, selectedPort);
+                GameManager.Instance.TravelToPort(selectedPort, cost);
+                // Optionally, refresh the screen or update UI as needed
             }
         }
 
@@ -120,15 +127,26 @@ namespace StarSmuggler.Screens
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
+            // Draw the background texture
             spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
-            terminalWindow.Draw(spriteBatch);
-            spriteBatch.DrawString(font, $"Select Destination (Credits: {GameManager.Instance.Player.Credits})", new Vector2(50, 20), Color.White);
+            var previewHeight = terminalWindow.Bounds.Height - 350;
+            var ratio = (float)4 / 3; // Maintain a 4:3 aspect ratio for the preview
+            var previewWidth = Convert.ToInt32(previewHeight * ratio);
 
-            foreach (var button in travelButtons)
-            {
-                button.Draw(spriteBatch);
-            }
-            backButton.Draw(spriteBatch);
+            // Draw the port preview texture in the terminal window
+            spriteBatch.Draw(portPreviewTexture, new Rectangle(terminalWindow.Bounds.X + 65, terminalWindow.Bounds.Y + 75, previewWidth, previewHeight), Color.White);
+
+            // Draw the terminal window (defined above)
+            terminalWindow.Draw(spriteBatch);
+
+            // Draw the name and cost of the selected port
+            spriteBatch.DrawString(font, $"{selectedPort.Name}: {GameManager.Instance.GetTravelCost(currentPort, selectedPort)} Credits", new Vector2(terminalWindow.Bounds.X + 140, terminalWindow.Bounds.Y + 717), Color.White);
+
+            // Draw the next and previous buttons
+            previousButton.Draw(spriteBatch);
+            nextButton.Draw(spriteBatch);
+            // Draw the Travel button
+            travelButton.Draw(spriteBatch);
             spriteBatch.End();
         }
     }

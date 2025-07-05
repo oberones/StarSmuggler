@@ -23,10 +23,9 @@ namespace StarSmuggler.Screens
         private Button continueButton;
         private int terminalX;
         private int terminalY;
- 
+
          public void Refresh(ContentManager content)
         {
-            // Reload whatever content depends on game state
             var currentPort = GameManager.Instance.CurrentPort;
             portDescription = currentPort.Description;
             portName = currentPort.Name;
@@ -40,11 +39,14 @@ namespace StarSmuggler.Screens
             Console.WriteLine($"Loading port: {currentPort.Name}");
             portName = currentPort.Name;
             portDescription = currentPort.Description;
+
+            // Load the current port's music and background image
             currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
             Game1.AudioManager.PlaySong(currentPort.MusicTrackName);
             backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             Game1.AudioManager.LoadSfx("click");
             font = content.Load<SpriteFont>("Fonts/Terminal");
+            // Load the button and terminal textures
             buttonTexture = content.Load<Texture2D>("UI/button");  // Placeholder button image
             terminalTexture = content.Load<Texture2D>("UI/terminalEmptyNew"); 
             // Calculate the center position for the Terminal
@@ -97,7 +99,7 @@ namespace StarSmuggler.Screens
             spriteBatch.DrawString(font, $"Welcome to: {portName}", new Vector2(xOffset, yOffset), Color.Green);
 
             // Draw the port description and wrap it if necessary
-            string wrappedPortDesc = WrapText(font, portDescription, terminalWindow.Bounds.Width - 20); // Add padding
+            string wrappedPortDesc = WrapText(font, portDescription, terminalWindow.Bounds.Width - 175); // Add padding
             spriteBatch.DrawString(font, wrappedPortDesc, new Vector2(xOffset, yOffset + 60), Color.LightGreen);
             continueButton.Draw(spriteBatch);
 

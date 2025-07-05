@@ -75,7 +75,7 @@ namespace StarSmuggler.Screens
                 var inputRect = new Rectangle(500, y-60, 80, 40);
                 numericInputs.Add(new NumericInput(inputRect, buttonFont, buttonTexture));
             }
-            backButton = new BackButton(buttonFont, terminalButtonTexture, 960, 671, 100, 51);
+            backButton = new BackButton(buttonFont, terminalButtonTexture, 960, 670, 100, 51);
             doneButton = new Button(new Rectangle(1075, 670, 100, 51), "Done", buttonFont, terminalButtonTexture, Color.White);
         }
 
