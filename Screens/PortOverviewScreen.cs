@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Content;
 using StarSmuggler.UI;
-using StarSmuggler.Events;
-using System.Text;
 using System;
 
 namespace StarSmuggler.Screens
@@ -18,11 +16,15 @@ namespace StarSmuggler.Screens
         private string portName;
         private string portDescription;
         private Texture2D buttonTexture;
-        private Texture2D terminalTexture;
-        private Terminal terminalWindow;
-        private Button continueButton;
-        private int terminalX;
-        private int terminalY;
+        private Button visitTraderButton;
+        private Button returnToShipButton;
+        private Button refuelShipButton;
+        private InfoPanel infoPanel;
+        private Texture2D infoPanelTexture;
+        private Texture2D iconTradeTexture;
+        private Texture2D iconShipTexture;
+        private Texture2D iconFuelTexture;
+        private GraphicsDevice graphicsDevice;
 
          public void Refresh(ContentManager content)
         {
@@ -31,115 +33,147 @@ namespace StarSmuggler.Screens
             portName = currentPort.Name;
             backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
+
+            // Update the info panel with the current port information
+            if (infoPanel != null)
+            {
+                string panelTitle = $"Welcome to {portName}";
+                infoPanel.UpdateText(panelTitle, portDescription);
+            }
         }
 
-        public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
+        public void LoadContent(GraphicsDevice graphics, ContentManager content)
         {
+            // Cache the graphics device for later use
+            this.graphicsDevice = graphics;
+            // Load the name and description of the current port
             var currentPort = GameManager.Instance.CurrentPort;
             Console.WriteLine($"Loading port: {currentPort.Name}");
             portName = currentPort.Name;
             portDescription = currentPort.Description;
 
-            // Load the current port's music and background image
+            // Load the music and sound effects
             currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
-            Game1.AudioManager.PlaySong(currentPort.MusicTrackName);
-            backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             Game1.AudioManager.LoadSfx("click");
+
+            // Load the fonts and textures
+            backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             font = content.Load<SpriteFont>("Fonts/Terminal");
-            // Load the button and terminal textures
-            buttonTexture = content.Load<Texture2D>("UI/button");  // Placeholder button image
-            terminalTexture = content.Load<Texture2D>("UI/terminalEmptyNew"); 
-            // Calculate the center position for the Terminal
+            buttonTexture = content.Load<Texture2D>("UI/button");
+            infoPanelTexture = content.Load<Texture2D>("UI/infoPanel");
+            
+            // Load the icon textures
+            iconTradeTexture = content.Load<Texture2D>("UI/iconTrade");
+            iconShipTexture = content.Load<Texture2D>("UI/iconShip");
+            iconFuelTexture = content.Load<Texture2D>("UI/iconFuel");
+
+            // Play the current port's music
+            Game1.AudioManager.PlaySong(currentPort.MusicTrackName);
+            
+            // Calculate the screen dimensions
             int screenWidth = graphicsDevice.Viewport.Width;
             int screenHeight = graphicsDevice.Viewport.Height;
             
-            // Set the size of the continue button
-            int buttonWidth = 150; // Width of the button
-            int buttonHeight = 50; // Height of the button
+            // Set the size of the info panel
+            int panelWidth = 700;
+            int panelHeight = 558;
+            int panelX = (screenWidth - panelWidth) / 2; // Center horizontally
+            int panelY = (screenHeight - panelHeight) / 4;
 
-            int buttonX = screenWidth - buttonWidth - 20; // 20px padding from the right edge
-            int buttonY = screenHeight - buttonHeight - 20; // 20px padding from the bottom edge
-            continueButton = new Button(new Rectangle(buttonX, buttonY, buttonWidth, 50), "Continue", font, buttonTexture);
+            // Initialize the info panel
+            string panelTitle = $"Welcome to {portName}";
+            infoPanel = new InfoPanel(new Rectangle(panelX, panelY, panelWidth, panelHeight), titleText: panelTitle, descriptionText: portDescription, font: font, texture: infoPanelTexture);
+
+            // Set the size of the buttons
+            int buttonWidth = 200; // Width of the buttons
+            int buttonHeight = 60; // Height of the buttons
+            int buttonSpacing = 30; // Space between buttons
+            int iconPadding = 10; // Space between icons and buttons
+
+            // Calculate total width needed for all buttons
+            int totalButtonWidth = (3 * buttonWidth) + (2 * buttonSpacing);
             
+            // Calculate icon heights based on button width to maintain aspect ratio
+            int iconTradeHeight = (int)(iconTradeTexture.Height * ((float)buttonWidth / iconTradeTexture.Width));
+            int iconShipHeight = (int)(iconShipTexture.Height * ((float)buttonWidth / iconShipTexture.Width));
+            int iconFuelHeight = (int)(iconFuelTexture.Height * ((float)buttonWidth / iconFuelTexture.Width));
+            
+            // Find the maximum icon height to ensure consistent spacing
+            int maxIconHeight = Math.Max(iconTradeHeight, Math.Max(iconShipHeight, iconFuelHeight));
+            
+            // Position buttons horizontally at the bottom of the screen, accounting for icon space
+            int startX = (screenWidth - totalButtonWidth) / 2; // Center horizontally
+            int buttonY = screenHeight - buttonHeight - 50; // Position at bottom with padding
+            int iconY = buttonY - maxIconHeight - iconPadding; // Position icons above buttons
 
-            int terminalWidth = 800; // Width of the Terminal
-            int terminalHeight = 802; // Height of the Terminal
-
-            terminalX = (screenWidth - terminalWidth) / 2;
-            terminalY = (screenHeight - terminalHeight) / 2;
-
-            terminalWindow = new Terminal(new Rectangle(terminalX, terminalY, terminalWidth, terminalHeight), texture: terminalTexture);
+            // Initialize the three buttons horizontally
+            visitTraderButton = new Button(new Rectangle(startX, buttonY, buttonWidth, buttonHeight), "Visit Trader", font, buttonTexture);
+            returnToShipButton = new Button(new Rectangle(startX + buttonWidth + buttonSpacing, buttonY, buttonWidth, buttonHeight), "Return to Ship", font, buttonTexture);
+            refuelShipButton = new Button(new Rectangle(startX + 2 * (buttonWidth + buttonSpacing), buttonY, buttonWidth, buttonHeight), "Refuel Ship", font, buttonTexture);
         }
 
         public void Update(GameTime gameTime)
         {
-            continueButton.Update(gameTime);
+            visitTraderButton.Update(gameTime);
+            returnToShipButton.Update(gameTime);
+            refuelShipButton.Update(gameTime);
 
-            if (continueButton.WasClicked)
+            if (visitTraderButton.WasClicked)
             {
                 Game1.AudioManager.PlaySfx("click");
                 GameManager.Instance.SetGameState(GameState.TradeScreen);
+            }
+            else if (returnToShipButton.WasClicked)
+            {
+                Game1.AudioManager.PlaySfx("click");
+                GameManager.Instance.SetGameState(GameState.TravelScreen);
+            }
+            else if (refuelShipButton.WasClicked)
+            {
+                Game1.AudioManager.PlaySfx("click");
+                // TODO: Implement refuel screen in the future
+                // For now, do nothing
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
             spriteBatch.Begin();
-            int xOffset = terminalX + 100;
-            int yOffset = terminalY + 100;;
 
             // Draw the background texture
-            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height), Color.White);
+
+            // Draw the info panel
+            infoPanel.Draw(spriteBatch);
             
-            // Draw the terminal window
-            terminalWindow.Draw(spriteBatch);
+            // Calculate icon positions and dimensions (same as in LoadContent)
+            int buttonWidth = 200;
+            int buttonSpacing = 30;
+            int iconPadding = 10;
+            int totalButtonWidth = (3 * buttonWidth) + (2 * buttonSpacing);
+            int startX = (1536 - totalButtonWidth) / 2; // Use actual screen width
+            int buttonY = 1024 - 60 - 50; // Use actual screen height and button height
+            
+            // Calculate icon heights based on button width to maintain aspect ratio
+            int iconTradeHeight = (int)(iconTradeTexture.Height * ((float)buttonWidth / iconTradeTexture.Width));
+            int iconShipHeight = (int)(iconShipTexture.Height * ((float)buttonWidth / iconShipTexture.Width));
+            int iconFuelHeight = (int)(iconFuelTexture.Height * ((float)buttonWidth / iconFuelTexture.Width));
+            
+            // Find the maximum icon height for consistent positioning
+            int maxIconHeight = Math.Max(iconTradeHeight, Math.Max(iconShipHeight, iconFuelHeight));
+            int iconY = buttonY - maxIconHeight - iconPadding;
+            
+            // Draw the icons above each button
+            spriteBatch.Draw(iconTradeTexture, new Rectangle(startX, iconY, buttonWidth, iconTradeHeight), Color.White);
+            spriteBatch.Draw(iconShipTexture, new Rectangle(startX + buttonWidth + buttonSpacing, iconY, buttonWidth, iconShipHeight), Color.White);
+            spriteBatch.Draw(iconFuelTexture, new Rectangle(startX + 2 * (buttonWidth + buttonSpacing), iconY, buttonWidth, iconFuelHeight), Color.White);
+            
+            // Draw the three buttons
+            visitTraderButton.Draw(spriteBatch);
+            returnToShipButton.Draw(spriteBatch);
+            refuelShipButton.Draw(spriteBatch);
 
-            // Draw the port name
-            spriteBatch.DrawString(font, $"Welcome to: {portName}", new Vector2(xOffset, yOffset), Color.Green);
-
-            // Draw the port description and wrap it if necessary
-            string wrappedPortDesc = WrapText(font, portDescription, terminalWindow.Bounds.Width - 175); // Add padding
-            spriteBatch.DrawString(font, wrappedPortDesc, new Vector2(xOffset, yOffset + 60), Color.LightGreen);
-            continueButton.Draw(spriteBatch);
-
-            if (GameManager.Instance.GetLastEvent() is GameEvent evt)
-            {
-                spriteBatch.DrawString(font, $"EVENT: {evt.Name}", new Vector2(xOffset, yOffset + 140), Color.Yellow);
-                // Wrap the evt.Description text
-                string wrappedDescription = WrapText(font, evt.Description, terminalWindow.Bounds.Width - 175); // Add padding
-                spriteBatch.DrawString(font, wrappedDescription, new Vector2(xOffset, yOffset + 170), Color.LightYellow);
-            }           
             spriteBatch.End();
-        }
-
-
-
-        // Helper method to wrap text
-        private string WrapText(SpriteFont spriteFont, string text, float maxLineWidth)
-        {
-            string[] words = text.Split(' ');
-            StringBuilder wrappedText = new StringBuilder();
-            float lineWidth = 0f;
-            float spaceWidth = spriteFont.MeasureString(" ").X;
-
-            foreach (string word in words)
-            {
-                Vector2 size = spriteFont.MeasureString(word);
-                if (lineWidth + size.X < maxLineWidth)
-                {
-                    wrappedText.Append(word + " ");
-                    lineWidth += size.X + spaceWidth;
-                }
-                else
-                {
-                    wrappedText.AppendLine();
-                    wrappedText.Append(word + " ");
-                    lineWidth = size.X + spaceWidth;
-                }
-            }
-
-            return wrappedText.ToString();
         }
     }
 }

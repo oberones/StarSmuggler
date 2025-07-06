@@ -28,6 +28,7 @@ namespace StarSmuggler.Screens
         private SpriteFont buttonFont;
         private Texture2D terminalButtonTexture;
         private Button travelButton;
+        private ContentManager content;
 
         // Refresh is called when the game state changes, such as when the player travels to a new port
         // It reloads the travel buttons and their prices based on the current game state
@@ -49,6 +50,7 @@ namespace StarSmuggler.Screens
 
             // Cache for refresh use
             this.graphicsDevice = graphicsDevice;
+            this.content = content;
             buttonFont = content.Load<SpriteFont>("Fonts/Terminal");
             // Load the background texture, font, and button texture 
             font = content.Load<SpriteFont>("Fonts/Terminal");
@@ -72,8 +74,10 @@ namespace StarSmuggler.Screens
 
             // // Generate the travel buttons based on the current game state
             // GenerateTravelButtons(graphicsDevice, content);
-            previousButton = new Button(new Rectangle(960, 670, 100, 51), "Prev.", buttonFont, terminalButtonTexture, Color.White);
-            nextButton = new Button(new Rectangle(1075, 670, 100, 51), "Next", buttonFont, terminalButtonTexture, Color.White);
+            int navBtnX = terminalWindow.Bounds.X + 620;
+            int navBtnY = terminalWindow.Bounds.Y + 670;
+            previousButton = new Button(new Rectangle(navBtnX, navBtnY, 100, 51), "Prev.", buttonFont, terminalButtonTexture, Color.White);
+            nextButton = new Button(new Rectangle(navBtnX + 100, navBtnY, 100, 51), "Next", buttonFont, terminalButtonTexture, Color.White);
             // Add Travel button inside the terminal window, below the port name/cost
             int travelBtnWidth = 140;
             int travelBtnHeight = 51;
@@ -99,7 +103,7 @@ namespace StarSmuggler.Screens
                 if (currentIndex > 0)
                 {
                     selectedPort = PortsDatabase.AllPorts[currentIndex - 1];
-                    // previewTexture = Game1.Content.Load<Texture2D>(selectedPort.PreviewImagePath);
+                    portPreviewTexture = content.Load<Texture2D>(selectedPort.PreviewImagePath);
                 }
             }
             else if (nextButton.WasClicked)
@@ -110,7 +114,7 @@ namespace StarSmuggler.Screens
                 if (currentIndex < PortsDatabase.AllPorts.Count - 1)
                 {
                     selectedPort = PortsDatabase.AllPorts[currentIndex + 1];
-                    // previewTexture = Game1.Content.Load<Texture2D>(selectedPort.PreviewImagePath);
+                    portPreviewTexture = content.Load<Texture2D>(selectedPort.PreviewImagePath);
                 }
             }
             else if (travelButton.WasClicked)
@@ -128,7 +132,7 @@ namespace StarSmuggler.Screens
         {
             spriteBatch.Begin();
             // Draw the background texture
-            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height), Color.White);
             var previewHeight = terminalWindow.Bounds.Height - 350;
             var ratio = (float)4 / 3; // Maintain a 4:3 aspect ratio for the preview
             var previewWidth = Convert.ToInt32(previewHeight * ratio);
