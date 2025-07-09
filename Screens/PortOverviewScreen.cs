@@ -1,10 +1,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Content;
 using StarSmuggler.UI;
 using System;
+using StarSmuggler.Events;
 
 namespace StarSmuggler.Screens
 {
@@ -25,6 +25,7 @@ namespace StarSmuggler.Screens
         private Texture2D iconShipTexture;
         private Texture2D iconFuelTexture;
         private GraphicsDevice graphicsDevice;
+        private GameEvent currentEvent;
 
          public void Refresh(ContentManager content)
         {
@@ -33,12 +34,16 @@ namespace StarSmuggler.Screens
             portName = currentPort.Name;
             backgroundTexture = content.Load<Texture2D>(currentPort.BackgroundImagePath);
             currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
+            currentEvent = GameManager.Instance.Player.CurrentEvent;
 
             // Update the info panel with the current port information
             if (infoPanel != null)
             {
+                string eventName = currentEvent?.Name ?? "";
+                string eventDescription = currentEvent?.Description ?? "";
                 string panelTitle = $"Welcome to {portName}";
-                infoPanel.UpdateText(panelTitle, portDescription);
+                string panelDescription = portDescription;
+                infoPanel.UpdateText(panelTitle, panelDescription, eventName, eventDescription);
             }
         }
 
@@ -51,6 +56,18 @@ namespace StarSmuggler.Screens
             Console.WriteLine($"Loading port: {currentPort.Name}");
             portName = currentPort.Name;
             portDescription = currentPort.Description;
+
+            // Load the current event if it exists
+            var currentEvent = GameManager.Instance.Player.CurrentEvent;
+            if (currentEvent != null)
+            {
+                Console.WriteLine($"Current event: {currentEvent.Name}");
+                Console.WriteLine($"Event description: {currentEvent.Description}");
+            }
+            else
+            {
+                Console.WriteLine("No current event.");
+            }
 
             // Load the music and sound effects
             currentSong = content.Load<Song>($"Music/{currentPort.MusicTrackName}");
@@ -82,7 +99,8 @@ namespace StarSmuggler.Screens
 
             // Initialize the info panel
             string panelTitle = $"Welcome to {portName}";
-            infoPanel = new InfoPanel(new Rectangle(panelX, panelY, panelWidth, panelHeight), titleText: panelTitle, descriptionText: portDescription, font: font, texture: infoPanelTexture);
+            string panelDescription = portDescription;
+            infoPanel = new InfoPanel(new Rectangle(panelX, panelY, panelWidth, panelHeight), titleText: panelTitle, descriptionText: panelDescription, eventName: currentEvent?.Name, eventDescription: currentEvent?.Description, font: font, texture: infoPanelTexture);
 
             // Set the size of the buttons
             int buttonWidth = 200; // Width of the buttons
