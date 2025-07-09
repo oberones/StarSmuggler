@@ -28,6 +28,7 @@ namespace StarSmuggler.Events
                 player => {
                     foreach (var g in player.CurrentPort.AvailableItems)
                         player.CurrentPrices[player.CurrentPort.Id][g.Id] *= 2;
+                    Console.WriteLine($"Prices doubled at {player.CurrentPort.Name} due to Merchant Strike.");
                 }),
 
             new GameEvent(
@@ -40,6 +41,7 @@ namespace StarSmuggler.Events
                         var index = rng.Next(player.CurrentPort.AvailableItems.Count);
                         var item = player.CurrentPort.AvailableItems[index];
                         player.CurrentPrices[player.CurrentPort.Id][item.Id] /= 2;
+                        Console.WriteLine($"Market glut for {item.Name} at {player.CurrentPort.Name}. New price: {player.CurrentPrices[player.CurrentPort.Id][item.Id]}");
                     }
                 }),
 

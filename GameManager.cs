@@ -156,10 +156,10 @@ namespace StarSmuggler
                 Player.JumpsSinceLastUpdate++;
                 // Update prices (if condition met)
                 UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
+                // Trigger a random event after travel (30% chance)
+                TriggerRandomEvent();
                 // Change the game state to the port overview
                 SetGameState(GameState.PortOverview);
-                // Trigger a random event after travel (25% chance)
-                TriggerRandomEvent();
                 // Save the game state after travel
                 SaveLoadManager.SaveGame(Player);
                 // Check for game over conditions after travel
@@ -200,17 +200,22 @@ namespace StarSmuggler
                 Game1.ScreenManagerRef.SetActive(newState);
         }
 
-        // Trigger a random event with a 25% chance, executing the event if it occurs
+        // Trigger a random event with a 30% chance, executing the event if it occurs
         private void TriggerRandomEvent()
         {
             var rng = new Random();
-            rng.Next(1, 100);
-            if (rng.Next(1, 100) >= 30) {// 30% chance to trigger an event
-                Player.CurrentEvent = null; // No event triggered
-                return; // No event triggered
+            int eventChance = rng.Next(1, 101); // Generate number from 1 to 100
+            if (eventChance <= 30) // 30% chance to trigger an event
+            {
+                Player.CurrentEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
+                Player.CurrentEvent.Execute(Player);
+                Console.WriteLine($"Event triggered: {Player.CurrentEvent.Name}");
             }
-            Player.CurrentEvent = EventDatabase.AllEvents[rng.Next(EventDatabase.AllEvents.Count)];
-            Player.CurrentEvent.Execute(Player);
+            else
+            {
+                Player.CurrentEvent = null; // No event triggered
+                Console.WriteLine("No event triggered during travel.");
+            }
         }
         
         // Get the last triggered event
