@@ -15,6 +15,7 @@ namespace StarSmuggler.Screens
         private Texture2D backgroundTexture;
         private Texture2D logoTexture;
         private List<Button> buttons;
+        private GraphicsDevice graphicsDevice;
 
         private Song currentSong;
         
@@ -36,6 +37,7 @@ namespace StarSmuggler.Screens
             buttons = new List<Button>();
             int startY = 450;
             int spacing = 70;
+            this.graphicsDevice = graphics;
 
             for (int i = 0; i < labels.Length; i++)
             {
@@ -63,6 +65,8 @@ namespace StarSmuggler.Screens
             switch (labels[index])
             {
                 case "New Game":
+                    // Sleep for 0.5 seconds to allow the click sound to play
+                    System.Threading.Thread.Sleep(300);
                     GameManager.Instance.StartNewGame();
                     break;
                 case "Load Game":
@@ -80,7 +84,7 @@ namespace StarSmuggler.Screens
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
-            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height), Color.White);
             spriteBatch.Draw(logoTexture, new Rectangle(434, 25, 1463/2, 612/2), Color.White);
             // spriteBatch.DrawString(font, "SPACE SMUGGLER", new Vector2(480, 150), Color.White);
 

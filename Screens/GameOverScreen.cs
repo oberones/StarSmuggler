@@ -13,13 +13,14 @@ namespace StarSmuggler.Screens
     {
         private string summaryText = "";
         private Texture2D backgroundTexture;
-
+        private GraphicsDevice graphicsDevice;
         private SpriteFont font;
 
         public void LoadContent(GraphicsDevice graphics, ContentManager content)
         {
             font = content.Load<SpriteFont>("Fonts/Default");
             backgroundTexture = content.Load<Texture2D>("Screens/gameover_broke");
+            this.graphicsDevice = graphics;
         }
 
         public void Update(GameTime gameTime)
@@ -33,7 +34,7 @@ namespace StarSmuggler.Screens
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
-            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1600, 900), Color.White);
+            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height), Color.White);
             var y = 420;
             foreach (var line in summaryText.Split('\n'))
             {
