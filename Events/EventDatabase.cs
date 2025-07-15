@@ -11,15 +11,24 @@ namespace StarSmuggler.Events
                 // Name of the event
                 "Customs Shake-Down",
 
-                // Description of the event
+                // Description of the event - will be updated dynamically
                 "Local security stops you for a 'random inspection' and demands a bribe.",
 
                 // Effect of the event
                 player=> {
                     var rng = new Random();
-                    int bribe = rng.Next(25, 101);
-                    player.Credits = Math.Max(0, player.Credits - bribe);
-
+                    int baseBribe = rng.Next(25, 101);
+                    // Scale bribe based on player wealth (5-15% of credits), minimum is base amount
+                    float percentage = (float)(rng.NextDouble() * 0.10 + 0.05); // 5-15%
+                    int scaledBribe = Math.Max(baseBribe, (int)(player.Credits * percentage));
+                    
+                    // Update description with actual amount
+                    var currentEvent = player.CurrentEvent;
+                    if (currentEvent != null)
+                        currentEvent.Description = $"Local security stops you for a 'random inspection' and demands a bribe of {scaledBribe} credits.";
+                    
+                    player.Credits = Math.Max(0, player.Credits - scaledBribe);
+                    Console.WriteLine($"Customs bribe: {scaledBribe} credits ({percentage:P1} of wealth, min {baseBribe})");
                 }),
 
             new GameEvent(
@@ -65,8 +74,18 @@ namespace StarSmuggler.Events
                 "Pirates attack your ship! You lose some credits to avoid destruction.",
                 player => {
                     var rng = new Random();
-                    int loss = rng.Next(50, 201);
-                    player.Credits = Math.Max(0, player.Credits - loss);
+                    int baseLoss = rng.Next(50, 201);
+                    // Scale loss based on player wealth (10-25% of credits), minimum is base amount
+                    float percentage = (float)(rng.NextDouble() * 0.15 + 0.10); // 10-25%
+                    int scaledLoss = Math.Max(baseLoss, (int)(player.Credits * percentage));
+                    
+                    // Update description with actual amount
+                    var currentEvent = player.CurrentEvent;
+                    if (currentEvent != null)
+                        currentEvent.Description = $"Pirates attack your ship! You lose {scaledLoss} credits to avoid destruction.";
+                    
+                    player.Credits = Math.Max(0, player.Credits - scaledLoss);
+                    Console.WriteLine($"Pirate ambush loss: {scaledLoss} credits ({percentage:P1} of wealth, min {baseLoss})");
                 }),
 
             new GameEvent(
@@ -74,8 +93,18 @@ namespace StarSmuggler.Events
                 "Your ship's engine malfunctions, requiring repairs. You lose some credits.",
                 player => {
                     var rng = new Random();
-                    int repairCost = rng.Next(100, 301);
-                    player.Credits = Math.Max(0, player.Credits - repairCost);
+                    int baseRepairCost = rng.Next(100, 301);
+                    // Scale repair cost based on player wealth (8-20% of credits), minimum is base amount
+                    float percentage = (float)(rng.NextDouble() * 0.12 + 0.08); // 8-20%
+                    int scaledRepairCost = Math.Max(baseRepairCost, (int)(player.Credits * percentage));
+                    
+                    // Update description with actual amount
+                    var currentEvent = player.CurrentEvent;
+                    if (currentEvent != null)
+                        currentEvent.Description = $"Your ship's engine malfunctions, requiring repairs costing {scaledRepairCost} credits.";
+                    
+                    player.Credits = Math.Max(0, player.Credits - scaledRepairCost);
+                    Console.WriteLine($"Engine repair cost: {scaledRepairCost} credits ({percentage:P1} of wealth, min {baseRepairCost})");
                 }),
 
             // new GameEvent(
@@ -96,8 +125,18 @@ namespace StarSmuggler.Events
                 "Your crew demands higher wages. You lose some credits to appease them.",
                 player => {
                     var rng = new Random();
-                    int wageIncrease = rng.Next(50, 151);
-                    player.Credits = Math.Max(0, player.Credits - wageIncrease);
+                    int baseWageIncrease = rng.Next(50, 151);
+                    // Scale wage increase based on player wealth (6-18% of credits), minimum is base amount
+                    float percentage = (float)(rng.NextDouble() * 0.12 + 0.06); // 6-18%
+                    int scaledWageIncrease = Math.Max(baseWageIncrease, (int)(player.Credits * percentage));
+                    
+                    // Update description with actual amount
+                    var currentEvent = player.CurrentEvent;
+                    if (currentEvent != null)
+                        currentEvent.Description = $"Your crew demands higher wages. You pay {scaledWageIncrease} credits to appease them.";
+                    
+                    player.Credits = Math.Max(0, player.Credits - scaledWageIncrease);
+                    Console.WriteLine($"Crew wage increase: {scaledWageIncrease} credits ({percentage:P1} of wealth, min {baseWageIncrease})");
                 }),
         };
     }
