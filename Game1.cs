@@ -53,6 +53,7 @@ public class Game1 : Game
         screenManager.Register(GameState.MainMenu, new MainMenuScreen());
         screenManager.Register(GameState.TradeScreen, new TradeScreen());
         screenManager.Register(GameState.TravelScreen, new TravelScreen());
+        screenManager.Register(GameState.TravelAnimation, new TravelAnimationScreen());
         screenManager.Register(GameState.PortOverview, new PortOverviewScreen());
         screenManager.Register(GameState.GameOver, new GameOverScreen());
 

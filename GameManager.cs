@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security;
 using StarSmuggler.Events;
+using StarSmuggler.Screens;
 
 
 namespace StarSmuggler
@@ -144,32 +145,28 @@ namespace StarSmuggler
         {
             if (Player.Credits >= cost)
             {
-                Console.WriteLine($"Current port: {Player.CurrentPort.Name}");
-                // Deduct travel cost
-                Player.Credits -= cost;
-                // Set player's current port to the destination
-                Player.CurrentPort = destination;
-                Console.WriteLine($"Destination port: {Player.CurrentPort.Name}");
-                // Load the available goods for the new port
-                LoadGoodsForCurrentPort();
-                // Update the number of jumps since last market update
-                Player.JumpsSinceLastUpdate++;
-                // Update prices (if condition met)
-                UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
-                // Trigger a random event after travel (30% chance)
-                TriggerRandomEvent();
-                // Change the game state to the port overview
-                SetGameState(GameState.PortOverview);
-                // Save the game state after travel
-                SaveLoadManager.SaveGame(Player);
-                // Check for game over conditions after travel
-                Console.WriteLine($"Checking for game over conditions after travel to {Player.CurrentPort.Name}");
-                Instance.CheckForGameOver();
-
+                Console.WriteLine($"Initiating travel from {Player.CurrentPort.Name} to {destination.Name}");
+                
+                // Set up the travel animation screen with destination information
+                var screenManager = Game1.ScreenManagerRef;
+                if (screenManager != null)
+                {
+                    // Get the travel animation screen and set up the destination
+                    var animationScreen = screenManager.GetScreen(GameState.TravelAnimation) as TravelAnimationScreen;
+                    if (animationScreen != null)
+                    {
+                        animationScreen.SetTravelDestination(destination, cost);
+                    }
+                }
+                
+                // Transition to the travel animation screen
+                // The actual travel logic will be processed when the animation completes
+                SetGameState(GameState.TravelAnimation);
             }
             else
             {
                 // Handle insufficient funds
+                Console.WriteLine($"Insufficient credits for travel. Required: {cost}, Available: {Player.Credits}");
                 // (e.g., show warning or disable option in UI)
             }
         }
@@ -201,7 +198,7 @@ namespace StarSmuggler
         }
 
         // Trigger a random event with a 30% chance, executing the event if it occurs
-        private void TriggerRandomEvent()
+        public void TriggerRandomEvent()
         {
             var rng = new Random();
             int eventChance = rng.Next(1, 101); // Generate number from 1 to 100
