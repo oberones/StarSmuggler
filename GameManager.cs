@@ -20,17 +20,17 @@ namespace StarSmuggler
         public int JumpsSinceLastUpdate => Player.JumpsSinceLastUpdate;
 
         // Check if the game is over based on player's credits and cargo
-        // If player has less than 50 credits and cannot sell cargo for enough, game is over
+        // If player has less than 15 credits and cannot sell cargo for enough, game is over
         public void CheckForGameOver()
         {
             var player = Player;
             var port = player.CurrentPort;
             var currentPrices = player.CurrentPrices[port.Id];
 
-            if (player.Credits >= 50)
+            if (player.Credits >= 15)
                 return; // Player can still travel
 
-            // Try to find if cargo is sellable for enough to earn 50
+            // Try to find if cargo is sellable for enough to earn 15
             int potentialRevenue = 0;
 
             foreach (var item in player.CargoHold)
@@ -40,7 +40,7 @@ namespace StarSmuggler
                     var marketPrice = currentPrices[item.Key.Id];
                     potentialRevenue += item.Value * marketPrice; // Number of items * market price
                     Console.WriteLine($"Checking item: {item.Key.Name}, Quantity: {item.Value}, Market Price: {marketPrice}, Potential Revenue: {potentialRevenue}");
-                    if (potentialRevenue >= 50)
+                    if (potentialRevenue >= 15)
                         return; // Can sell enough to continue
                 }
             }
