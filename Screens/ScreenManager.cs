@@ -27,6 +27,12 @@ namespace StarSmuggler.Screens
             isLoaded[state] = false; // mark as not yet loaded
         }
 
+        // Method to get a registered screen for a specific game state
+        public IScreen GetScreen(GameState state)
+        {
+            return screens.TryGetValue(state, out var screen) ? screen : null;
+        }
+
         // Method to set the active screen based on the game state
         public void SetActive(GameState state)
         {

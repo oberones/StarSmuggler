@@ -6,6 +6,7 @@ namespace StarSmuggler
         PortOverview,
         TradeScreen,
         TravelScreen,
+        TravelAnimation,
         GameOver
     }
 }

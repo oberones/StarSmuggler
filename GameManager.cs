@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security;
 using StarSmuggler.Events;
+using StarSmuggler.Screens;
 
 
 namespace StarSmuggler
@@ -20,17 +21,17 @@ namespace StarSmuggler
         public int JumpsSinceLastUpdate => Player.JumpsSinceLastUpdate;
 
         // Check if the game is over based on player's credits and cargo
-        // If player has less than 50 credits and cannot sell cargo for enough, game is over
+        // If player has less than 15 credits and cannot sell cargo for enough, game is over
         public void CheckForGameOver()
         {
             var player = Player;
             var port = player.CurrentPort;
             var currentPrices = player.CurrentPrices[port.Id];
 
-            if (player.Credits >= 50)
+            if (player.Credits >= 15)
                 return; // Player can still travel
 
-            // Try to find if cargo is sellable for enough to earn 50
+            // Try to find if cargo is sellable for enough to earn 15
             int potentialRevenue = 0;
 
             foreach (var item in player.CargoHold)
@@ -40,7 +41,7 @@ namespace StarSmuggler
                     var marketPrice = currentPrices[item.Key.Id];
                     potentialRevenue += item.Value * marketPrice; // Number of items * market price
                     Console.WriteLine($"Checking item: {item.Key.Name}, Quantity: {item.Value}, Market Price: {marketPrice}, Potential Revenue: {potentialRevenue}");
-                    if (potentialRevenue >= 50)
+                    if (potentialRevenue >= 15)
                         return; // Can sell enough to continue
                 }
             }
@@ -144,32 +145,28 @@ namespace StarSmuggler
         {
             if (Player.Credits >= cost)
             {
-                Console.WriteLine($"Current port: {Player.CurrentPort.Name}");
-                // Deduct travel cost
-                Player.Credits -= cost;
-                // Set player's current port to the destination
-                Player.CurrentPort = destination;
-                Console.WriteLine($"Destination port: {Player.CurrentPort.Name}");
-                // Load the available goods for the new port
-                LoadGoodsForCurrentPort();
-                // Update the number of jumps since last market update
-                Player.JumpsSinceLastUpdate++;
-                // Update prices (if condition met)
-                UpdatePrices(PortsDatabase.AllPorts, ItemsDatabase.AllItems);
-                // Trigger a random event after travel (30% chance)
-                TriggerRandomEvent();
-                // Change the game state to the port overview
-                SetGameState(GameState.PortOverview);
-                // Save the game state after travel
-                SaveLoadManager.SaveGame(Player);
-                // Check for game over conditions after travel
-                Console.WriteLine($"Checking for game over conditions after travel to {Player.CurrentPort.Name}");
-                Instance.CheckForGameOver();
-
+                Console.WriteLine($"Initiating travel from {Player.CurrentPort.Name} to {destination.Name}");
+                
+                // Set up the travel animation screen with destination information
+                var screenManager = Game1.ScreenManagerRef;
+                if (screenManager != null)
+                {
+                    // Get the travel animation screen and set up the destination
+                    var animationScreen = screenManager.GetScreen(GameState.TravelAnimation) as TravelAnimationScreen;
+                    if (animationScreen != null)
+                    {
+                        animationScreen.SetTravelDestination(destination, cost);
+                    }
+                }
+                
+                // Transition to the travel animation screen
+                // The actual travel logic will be processed when the animation completes
+                SetGameState(GameState.TravelAnimation);
             }
             else
             {
                 // Handle insufficient funds
+                Console.WriteLine($"Insufficient credits for travel. Required: {cost}, Available: {Player.Credits}");
                 // (e.g., show warning or disable option in UI)
             }
         }
@@ -201,7 +198,7 @@ namespace StarSmuggler
         }
 
         // Trigger a random event with a 30% chance, executing the event if it occurs
-        private void TriggerRandomEvent()
+        public void TriggerRandomEvent()
         {
             var rng = new Random();
             int eventChance = rng.Next(1, 101); // Generate number from 1 to 100

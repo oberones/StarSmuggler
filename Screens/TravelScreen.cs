@@ -12,7 +12,7 @@ namespace StarSmuggler.Screens
     {
         // Class variables are accessible to all methods in this class
         // They are not accessible to other classes unless they are public or protected
-        private List<Port> availableDestinations;
+        // private List<Port> availableDestinations;
         private Texture2D backgroundTexture;
         private BackButton backButton;
         private Texture2D buttonTexture;
