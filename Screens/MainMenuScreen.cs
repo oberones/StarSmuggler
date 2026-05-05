@@ -73,7 +73,10 @@ namespace StarSmuggler.Screens
                     GameManager.Instance.LoadGame();
                     break;
                 case "Save Game":
-                    SaveLoadManager.SaveGame(GameManager.Instance.Player);
+                    if (GameManager.Instance.HasActiveGame)
+                        SaveLoadManager.SaveGame(GameManager.Instance.Player);
+                    else
+                        System.Console.WriteLine("No active game to save.");
                     break;
                 case "Quit":
                     Game1.ExitGame();

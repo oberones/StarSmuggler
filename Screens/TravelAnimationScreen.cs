@@ -268,7 +268,8 @@ namespace StarSmuggler.Screens
                 SaveLoadManager.SaveGame(player);
                 
                 // Check for game over
-                gameManager.CheckForGameOver();
+                if (gameManager.CheckForGameOver())
+                    return;
             }
             
             // Transition to port overview screen

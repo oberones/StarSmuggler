@@ -14,6 +14,12 @@ namespace StarSmuggler
 
         public static void SaveGame(PlayerData player)
         {
+            if (player?.CurrentPort == null)
+            {
+                System.Console.WriteLine("No active game to save.");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(SavePath));
 
             var save = new SaveData

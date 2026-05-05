@@ -49,7 +49,7 @@ namespace StarSmuggler.Events
                         var rng = new Random();
                         var index = rng.Next(player.CurrentPort.AvailableItems.Count);
                         var item = player.CurrentPort.AvailableItems[index];
-                        player.CurrentPrices[player.CurrentPort.Id][item.Id] /= 2;
+                        player.CurrentPrices[player.CurrentPort.Id][item.Id] = Math.Max(1, player.CurrentPrices[player.CurrentPort.Id][item.Id] / 2);
                         Console.WriteLine($"Market glut for {item.Name} at {player.CurrentPort.Name}. New price: {player.CurrentPrices[player.CurrentPort.Id][item.Id]}");
                     }
                 }),
