@@ -134,6 +134,11 @@ StarSmuggler/
 │   ├── Ports/         # Port images/previews
 │   └── UI/            # Interface textures
 ├── Data/              # Future data management
+├── docs/              # Project planning and setup documentation
+│   ├── BACKLOG.md     # Outstanding work and feature ideas
+│   ├── NOTES.md       # Development notes and reference material
+│   ├── ROADMAP.md     # Planned milestones and feature direction
+│   └── TRAVEL_ANIMATION_SETUP.md # Travel animation implementation notes
 ├── Events/            # Event system (GameEvent, EventDatabase)
 ├── Items/             # Item system (Item, ItemsDatabase)
 ├── Player/            # PlayerData class
@@ -229,6 +234,12 @@ public interface IScreen
 1. **Prerequisites**: .NET 8.0 SDK, MonoGame 3.8+
 2. **Run**: `dotnet run` or F5 in Visual Studio
 3. **Build**: `dotnet publish -c Release -r win-x64 --self-contained`
+
+### Project Documentation
+- **docs/BACKLOG.md**: Pending features, improvements, and future tasks
+- **docs/NOTES.md**: Working notes, implementation details, and references
+- **docs/ROADMAP.md**: Planned milestones and broader project direction
+- **docs/TRAVEL_ANIMATION_SETUP.md**: Setup notes for the travel animation flow
 
 ### Common Development Tasks
 
