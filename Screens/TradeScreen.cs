@@ -139,7 +139,7 @@ namespace StarSmuggler.Screens
                 {
                     Game1.AudioManager.PlaySfx("click");
                     bool gameOver = GameManager.Instance.CheckForGameOver();
-                    SaveLoadManager.SaveGame(GameManager.Instance.Player);
+                    SaveLoadManager.SaveGame(GameManager.Instance.Player, gameOver ? GameState.GameOver : GameState.TravelScreen);
 
                     if (!gameOver)
                         GameManager.Instance.SetGameState(GameState.TravelScreen);

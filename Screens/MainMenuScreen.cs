@@ -73,8 +73,11 @@ namespace StarSmuggler.Screens
                     GameManager.Instance.LoadGame();
                     break;
                 case "Save Game":
-                    if (GameManager.Instance.HasActiveGame)
-                        SaveLoadManager.SaveGame(GameManager.Instance.Player);
+                    var gameManager = GameManager.Instance;
+                    if (gameManager.HasActiveGame && !gameManager.CheckForGameOver())
+                        SaveLoadManager.SaveGame(gameManager.Player, GameState.PortOverview);
+                    else if (gameManager.HasActiveGame)
+                        System.Console.WriteLine("Cannot save a stranded game from the main menu.");
                     else
                         System.Console.WriteLine("No active game to save.");
                     break;

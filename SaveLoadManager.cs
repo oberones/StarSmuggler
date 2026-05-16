@@ -12,7 +12,7 @@ namespace StarSmuggler
             "save.json"
         );
 
-        public static void SaveGame(PlayerData player)
+        public static void SaveGame(PlayerData player, GameState? stateToSave = null)
         {
             if (player?.CurrentPort == null)
             {
@@ -28,7 +28,8 @@ namespace StarSmuggler
                 Credits = player.Credits,
                 CargoLimit = player.CargoLimit,
                 CargoHold = new Dictionary<string, int>(),
-                Prices = player.CurrentPrices
+                Prices = player.CurrentPrices,
+                SavedState = NormalizeSavedState(stateToSave ?? GameManager.Instance.CurrentState)
             };
 
             foreach (var item in player.CargoHold)
@@ -38,6 +39,16 @@ namespace StarSmuggler
 
             string json = JsonSerializer.Serialize(save, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(SavePath, json);
+        }
+
+        private static GameState NormalizeSavedState(GameState state)
+        {
+            return state switch
+            {
+                GameState.GameOver => GameState.GameOver,
+                GameState.TravelScreen => GameState.TravelScreen,
+                _ => GameState.PortOverview
+            };
         }
 
         public static bool TryLoadGame(out SaveData data)

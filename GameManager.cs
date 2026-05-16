@@ -126,12 +126,29 @@ namespace StarSmuggler
                 }
 
                 LoadGoodsForCurrentPort();
-                SetGameState(GameState.PortOverview); 
+
+                if (data.SavedState == GameState.GameOver)
+                {
+                    SetGameState(GameState.GameOver);
+                    return;
+                }
+
+                if (CheckForGameOver())
+                    return;
+
+                SetGameState(GetLoadDestination(data.SavedState));
             }
             else
             {
                 StartNewGame();
             }
+        }
+
+        private static GameState GetLoadDestination(GameState savedState)
+        {
+            return Enum.IsDefined(typeof(GameState), savedState) && savedState == GameState.TravelScreen
+                ? GameState.TravelScreen
+                : GameState.PortOverview;
         }
 
         // Start a new game with a fresh player and random starting port
