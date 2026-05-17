@@ -9,5 +9,6 @@ namespace StarSmuggler
         public int Credits { get; set; }
         public int CargoLimit { get; set; }
         public Dictionary<string, int> CargoHold { get; set; } = new();
+        public GameState SavedState { get; set; } = GameState.PortOverview;
     }
 }

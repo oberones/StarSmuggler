@@ -113,10 +113,19 @@ The game is organized around a few central ideas:
 ### Run Locally
 
 ```bash
+dotnet tool restore
 dotnet run
 ```
 
 You can also open `StarSmuggler.sln` in Visual Studio or Rider and run the project there.
+
+The project uses the MonoGame content pipeline during builds. The required
+`dotnet-mgcb` CLI is pinned in `.config/dotnet-tools.json`, so `dotnet tool
+restore` should be run once after cloning, or automatically by the project
+restore target when building through an IDE.
+
+The terminal UI font, Share Tech Mono, is bundled in `Content/Fonts` under the
+SIL Open Font License so contributors do not need to install it system-wide.
 
 ### Build
 

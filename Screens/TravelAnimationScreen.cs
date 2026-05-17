@@ -263,12 +263,15 @@ namespace StarSmuggler.Screens
                 
                 // Trigger random event
                 gameManager.TriggerRandomEvent();
-                
-                // Save game
-                SaveLoadManager.SaveGame(player);
-                
+
                 // Check for game over
-                gameManager.CheckForGameOver();
+                bool gameOver = gameManager.CheckForGameOver();
+
+                // Save game
+                SaveLoadManager.SaveGame(player, gameOver ? GameState.GameOver : GameState.PortOverview);
+
+                if (gameOver)
+                    return;
             }
             
             // Transition to port overview screen

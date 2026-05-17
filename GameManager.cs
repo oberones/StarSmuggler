@@ -19,17 +19,21 @@ namespace StarSmuggler
         private GameState? previousState;
         private GameManager() { }
         public int JumpsSinceLastUpdate => Player.JumpsSinceLastUpdate;
+        public bool HasActiveGame => Player?.CurrentPort != null;
 
         // Check if the game is over based on player's credits and cargo
         // If player has less than 15 credits and cannot sell cargo for enough, game is over
-        public void CheckForGameOver()
+        public bool CheckForGameOver()
         {
             var player = Player;
+            if (player?.CurrentPort == null)
+                return false;
+
             var port = player.CurrentPort;
             var currentPrices = player.CurrentPrices[port.Id];
 
             if (player.Credits >= 15)
-                return; // Player can still travel
+                return false; // Player can still travel
 
             // Try to find if cargo is sellable for enough to earn 15
             int potentialRevenue = 0;
@@ -42,12 +46,13 @@ namespace StarSmuggler
                     potentialRevenue += item.Value * marketPrice; // Number of items * market price
                     Console.WriteLine($"Checking item: {item.Key.Name}, Quantity: {item.Value}, Market Price: {marketPrice}, Potential Revenue: {potentialRevenue}");
                     if (potentialRevenue >= 15)
-                        return; // Can sell enough to continue
+                        return false; // Can sell enough to continue
                 }
             }
 
             // No way to travel or make money → game over
             SetGameState(GameState.GameOver);
+            return true;
         }
 
         // Get the travel cost between two ports based on their zones and a base cost
@@ -121,12 +126,29 @@ namespace StarSmuggler
                 }
 
                 LoadGoodsForCurrentPort();
-                SetGameState(GameState.PortOverview); 
+
+                if (data.SavedState == GameState.GameOver)
+                {
+                    SetGameState(GameState.GameOver);
+                    return;
+                }
+
+                if (CheckForGameOver())
+                    return;
+
+                SetGameState(GetLoadDestination(data.SavedState));
             }
             else
             {
                 StartNewGame();
             }
+        }
+
+        private static GameState GetLoadDestination(GameState savedState)
+        {
+            return Enum.IsDefined(typeof(GameState), savedState) && savedState == GameState.TravelScreen
+                ? GameState.TravelScreen
+                : GameState.PortOverview;
         }
 
         // Start a new game with a fresh player and random starting port
@@ -143,6 +165,12 @@ namespace StarSmuggler
         // Travel to a specified port, deducting the travel cost and updating the player's state
         public void TravelToPort(Port destination, int cost)
         {
+            if (destination == null || Player?.CurrentPort == null || destination == Player.CurrentPort || cost <= 0)
+            {
+                Console.WriteLine("Ignoring travel request with no valid destination or cost.");
+                return;
+            }
+
             if (Player.Credits >= cost)
             {
                 Console.WriteLine($"Initiating travel from {Player.CurrentPort.Name} to {destination.Name}");

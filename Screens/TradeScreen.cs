@@ -138,9 +138,11 @@ namespace StarSmuggler.Screens
                 if (doneButton.WasClicked)
                 {
                     Game1.AudioManager.PlaySfx("click");
-                    GameManager.Instance.CheckForGameOver();
-                    SaveLoadManager.SaveGame(GameManager.Instance.Player);
-                    GameManager.Instance.SetGameState(GameState.TravelScreen);
+                    bool gameOver = GameManager.Instance.CheckForGameOver();
+                    SaveLoadManager.SaveGame(GameManager.Instance.Player, gameOver ? GameState.GameOver : GameState.TravelScreen);
+
+                    if (!gameOver)
+                        GameManager.Instance.SetGameState(GameState.TravelScreen);
                 }
             }
         }
