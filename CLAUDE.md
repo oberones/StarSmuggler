@@ -328,3 +328,8 @@ Content/
 ---
 
 *This guide should help you understand the codebase structure, development patterns, and vision for Star Smuggler. The project balances retro gaming nostalgia with modern development practices, aiming to create an immersive trading experience that goes beyond simple number manipulation.*
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
