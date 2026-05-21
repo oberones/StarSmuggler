@@ -31,7 +31,17 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Code Quality & Comments**: Plan identifies affected gameplay systems and
+  required comments/XML docs for public APIs, libraries, formulas, state
+  transitions, content-pipeline assumptions, or save-schema behavior.
+- **TDD**: Plan states the failing automated test or manual reproduction that
+  will be created before production changes.
+- **Testing Standards**: Plan lists build, automated tests, and manual
+  playtest scenarios required for this feature.
+- **UX Consistency**: Plan defines user-visible outcomes, invalid-action
+  feedback, navigation behavior, and game-over/save-load implications.
+- **Performance**: Plan identifies rendering, asset loading, logging,
+  allocation, or SpriteBatch risks and how they will be validated.
 
 ## Project Structure
 

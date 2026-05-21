@@ -191,9 +191,20 @@ public interface IScreen
 
 ### Code Style & Patterns
 - **Clear documentation**: Comprehensive XML comments for public methods
+- **Generous intent comments**: Document library usage, gameplay formulas, screen
+  state transitions, content-pipeline assumptions, and save/load schema behavior
 - **Meaningful naming**: Self-documenting variable and method names
 - **Single responsibility**: Classes focused on specific functionality
 - **Event-driven architecture**: Loose coupling between systems
+
+### Constitution & Quality Gates
+- Follow `.specify/memory/constitution.md` for code quality, testing, TDD,
+  user experience consistency, and performance requirements.
+- Define a failing automated test or manual reproduction before production
+  behavior changes whenever practical.
+- Validate gameplay logic with focused tests where possible and manual
+  playtests for rendering, audio, and input flows.
+- Include build, test, and manual validation notes in pull requests.
 
 ### MonoGame Best Practices
 - **Content Pipeline**: Use .mgcb for asset management

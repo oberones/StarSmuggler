@@ -95,6 +95,14 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Constitution Alignment *(mandatory)*
+
+- **Code Quality & Comments**: [State affected systems and required comments/docs]
+- **TDD Signal**: [Define the failing test or manual reproduction expected first]
+- **Testing Scope**: [List automated and manual validation required]
+- **UX Consistency**: [State visible screen, feedback, navigation, and copy expectations]
+- **Performance Requirement**: [State frame/input/asset-loading expectations or N/A with rationale]
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]

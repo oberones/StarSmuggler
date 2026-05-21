@@ -155,8 +155,12 @@ If you are contributing code:
 
 1. Fork the repository.
 2. Create a branch for your work.
-3. Make and test your changes.
-4. Open a pull request with a clear summary.
+3. Follow the project constitution in `.specify/memory/constitution.md`.
+4. Write the failing test or manual reproduction before implementation when practical.
+5. Add or update comments for public APIs, gameplay formulas, state transitions,
+   library use, and content-pipeline or save-schema assumptions.
+6. Build and test your changes, including manual playtests for UI/audio behavior.
+7. Open a pull request with a clear summary and validation notes.
 
 ## License
 
