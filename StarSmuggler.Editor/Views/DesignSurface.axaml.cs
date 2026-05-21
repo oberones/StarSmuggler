@@ -21,10 +21,18 @@ public sealed partial class DesignSurface : UserControl
     private const double DefaultFontSize = 18;
     private static readonly FontFamily EditorFontFamily =
         FontFamily.Parse("avares://StarSmuggler.Editor/Assets/Fonts#Share Tech Mono");
+    private static readonly SolidColorBrush SurfaceBackgroundBrush = new(Color.FromRgb(9, 13, 18));
+    private static readonly SolidColorBrush CanvasBackgroundBrush = new(Color.FromRgb(18, 24, 33));
+    private static readonly SolidColorBrush ResizeHandleBrush = new(Color.FromArgb(210, 255, 255, 255));
+    private static readonly Pen TextElementPen = new(new SolidColorBrush(Color.FromArgb(220, 91, 164, 255)), 2);
+    private static readonly Pen SelectedTextElementPen = new(new SolidColorBrush(Color.FromArgb(220, 91, 164, 255)), 3);
+    private static readonly Pen ButtonMaskPen = new(new SolidColorBrush(Color.FromArgb(230, 255, 185, 80)), 2);
+    private static readonly Pen SelectedButtonMaskPen = new(new SolidColorBrush(Color.FromArgb(230, 255, 185, 80)), 3);
 
     private Bitmap? backgroundBitmap;
     private string? loadedBitmapPath;
     private LayoutElementViewModel? activeElement;
+    private MainWindowViewModel? subscribedViewModel;
     private MenuLayoutRect activeStartBounds;
     private Point dragStartCanvasPoint;
     private DragMode dragMode = DragMode.None;
@@ -33,7 +41,7 @@ public sealed partial class DesignSurface : UserControl
     {
         AvaloniaXamlLoader.Load(this);
         ClipToBounds = true;
-        DataContextChanged += (_, _) => SubscribeToViewModel();
+        DataContextChanged += OnDataContextChanged;
         PointerPressed += OnPointerPressed;
         PointerMoved += OnPointerMoved;
         PointerReleased += OnPointerReleased;
@@ -44,8 +52,8 @@ public sealed partial class DesignSurface : UserControl
         base.Render(context);
 
         var canvasRect = GetCanvasRect(Bounds.Size);
-        context.FillRectangle(new SolidColorBrush(Color.FromRgb(9, 13, 18)), Bounds);
-        context.FillRectangle(new SolidColorBrush(Color.FromRgb(18, 24, 33)), canvasRect);
+        context.FillRectangle(SurfaceBackgroundBrush, Bounds);
+        context.FillRectangle(CanvasBackgroundBrush, canvasRect);
 
         if (DataContext is MainWindowViewModel viewModel)
         {
@@ -63,19 +71,68 @@ public sealed partial class DesignSurface : UserControl
         }
     }
 
-    private void SubscribeToViewModel()
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        if (DataContext is not MainWindowViewModel viewModel)
+        UnsubscribeFromViewModel();
+        backgroundBitmap?.Dispose();
+        backgroundBitmap = null;
+        loadedBitmapPath = null;
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        SubscribeToViewModel(DataContext as MainWindowViewModel);
+    }
+
+    private void SubscribeToViewModel(MainWindowViewModel? viewModel)
+    {
+        // The design surface can be recreated or rebound by Avalonia; explicit
+        // subscription ownership prevents duplicate invalidations and stale element handlers.
+        if (ReferenceEquals(subscribedViewModel, viewModel))
+        {
+            InvalidateVisual();
+            return;
+        }
+
+        UnsubscribeFromViewModel();
+        subscribedViewModel = viewModel;
+        if (subscribedViewModel is null)
+        {
+            InvalidateVisual();
+            return;
+        }
+
+        subscribedViewModel.PropertyChanged += OnViewModelChanged;
+        subscribedViewModel.Elements.CollectionChanged += OnElementsChanged;
+        foreach (var element in subscribedViewModel.Elements)
+        {
+            element.PropertyChanged += OnElementChanged;
+        }
+
+        InvalidateVisual();
+    }
+
+    private void UnsubscribeFromViewModel()
+    {
+        if (subscribedViewModel is null)
         {
             return;
         }
 
-        viewModel.PropertyChanged += (_, _) => InvalidateVisual();
-        viewModel.Elements.CollectionChanged += OnElementsChanged;
-        foreach (var element in viewModel.Elements)
+        subscribedViewModel.PropertyChanged -= OnViewModelChanged;
+        subscribedViewModel.Elements.CollectionChanged -= OnElementsChanged;
+        foreach (var element in subscribedViewModel.Elements)
         {
-            element.PropertyChanged += OnElementChanged;
+            element.PropertyChanged -= OnElementChanged;
         }
+
+        subscribedViewModel = null;
+    }
+
+    private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        InvalidateVisual();
     }
 
     private void OnElementsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -129,11 +186,10 @@ public sealed partial class DesignSurface : UserControl
         foreach (var element in viewModel.Elements)
         {
             var rect = ToScreenRect(element.Bounds, canvasRect);
-            var color = element.IsText
-                ? Color.FromArgb(220, 91, 164, 255)
-                : Color.FromArgb(230, 255, 185, 80);
-
-            var pen = new Pen(new SolidColorBrush(color), element == viewModel.SelectedElement ? 3 : 2);
+            var isSelected = element == viewModel.SelectedElement;
+            var pen = element.IsText
+                ? isSelected ? SelectedTextElementPen : TextElementPen
+                : isSelected ? SelectedButtonMaskPen : ButtonMaskPen;
             if (element.IsText)
             {
                 DrawTextPreview(context, element, rect, canvasRect);
@@ -143,7 +199,7 @@ public sealed partial class DesignSurface : UserControl
 
             if (element == viewModel.SelectedElement)
             {
-                context.FillRectangle(new SolidColorBrush(Color.FromArgb(210, 255, 255, 255)), GetResizeHandleRect(rect));
+                context.FillRectangle(ResizeHandleBrush, GetResizeHandleRect(rect));
             }
         }
     }
@@ -164,7 +220,6 @@ public sealed partial class DesignSurface : UserControl
         double fontSize = GetSourceFontSize(element.FontKey) *
             Math.Max(0.1, element.FontScale) *
             (canvasRect.Height / CanvasHeight);
-        var brush = new SolidColorBrush(ParsePreviewColor(element.Color));
         var formattedText = new FormattedText(
             element.Text,
             CultureInfo.CurrentCulture,
@@ -174,7 +229,7 @@ public sealed partial class DesignSurface : UserControl
                 FontStyle.Normal,
                 element.FontKey.Contains("Bold", StringComparison.OrdinalIgnoreCase) ? FontWeight.Bold : FontWeight.Normal),
             fontSize,
-            brush)
+            element.ColorBrush)
         {
             MaxTextWidth = Math.Max(1, rect.Width),
             MaxTextHeight = Math.Max(1, rect.Height),
@@ -209,36 +264,6 @@ public sealed partial class DesignSurface : UserControl
             nameof(HorizontalTextAlignment.Right) => TextAlignment.Right,
             _ => TextAlignment.Left
         };
-    }
-
-    private static Color ParsePreviewColor(string color)
-    {
-        string value = color.TrimStart('#');
-        try
-        {
-            if (value.Length == 6)
-            {
-                byte r = Convert.ToByte(value[..2], 16);
-                byte g = Convert.ToByte(value.Substring(2, 2), 16);
-                byte b = Convert.ToByte(value.Substring(4, 2), 16);
-                return Color.FromRgb(r, g, b);
-            }
-
-            if (value.Length == 8)
-            {
-                byte a = Convert.ToByte(value[..2], 16);
-                byte r = Convert.ToByte(value.Substring(2, 2), 16);
-                byte g = Convert.ToByte(value.Substring(4, 2), 16);
-                byte b = Convert.ToByte(value.Substring(6, 2), 16);
-                return Color.FromArgb(a, r, g, b);
-            }
-        }
-        catch (FormatException)
-        {
-            return Colors.White;
-        }
-
-        return Colors.White;
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)

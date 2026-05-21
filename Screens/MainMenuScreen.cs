@@ -20,9 +20,17 @@ namespace StarSmuggler.Screens
         private Texture2D logoTexture;
         private List<Button> fallbackButtons;
         private GraphicsDevice graphicsDevice;
-        private ContentManager contentManager;
 
-        private readonly string[] labels = new[] { "New Game", "Load Game", "Save Game", "Quit" };
+        private const double NewGameActionDelaySeconds = 0.3;
+
+        private readonly FallbackMenuItem[] fallbackMenuItems =
+        [
+            new FallbackMenuItem("New Game", MenuButtonAction.NewGame),
+            new FallbackMenuItem("Load Game", MenuButtonAction.LoadGame),
+            new FallbackMenuItem("Save Game", MenuButtonAction.SaveGame),
+            new FallbackMenuItem("Quit", MenuButtonAction.Quit)
+        ];
+
         private readonly List<RuntimeTextElement> layoutTextElements = new();
         private readonly List<RuntimeButtonMask> layoutButtonMasks = new();
         private readonly Dictionary<string, SpriteFont> fontCache = new(StringComparer.OrdinalIgnoreCase);
@@ -33,6 +41,8 @@ namespace StarSmuggler.Screens
         private int cachedViewportHeight;
         private MouseState previousMouse;
         private Song currentSong;
+        private MenuButtonAction? pendingAction;
+        private double pendingActionSecondsRemaining;
 
         public void Refresh(ContentManager content)
         {
@@ -53,13 +63,17 @@ namespace StarSmuggler.Screens
             backgroundTexture = content.Load<Texture2D>("UI/MainMenu");
             logoTexture = content.Load<Texture2D>("UI/logo1");
             graphicsDevice = graphics;
-            contentManager = content;
             CreateFallbackButtons();
             TryLoadRuntimeLayout(content);
         }
 
         public void Update(GameTime gameTime)
         {
+            if (UpdatePendingAction(gameTime))
+            {
+                return;
+            }
+
             if (isUsingLayout)
             {
                 UpdateLayoutButtons();
@@ -183,11 +197,17 @@ namespace StarSmuggler.Screens
                     var spriteFont = fontCache.TryGetValue(textElement.FontKey, out var cachedFont)
                         ? cachedFont
                         : font;
-                    layoutTextElements.Add(new RuntimeTextElement(textElement, spriteFont, rectangle));
+                    var fontScale = CoordinateScaler.ScaleFontScale(
+                        textElement.FontScale,
+                        layoutDocument.CanvasHeight,
+                        viewportHeight);
+                    layoutTextElements.Add(new RuntimeTextElement(textElement, spriteFont, rectangle, (float)fontScale));
                 }
-                else if (element is ButtonMaskElement buttonMaskElement && buttonMaskElement.Enabled)
+                else if (element is ButtonMaskElement buttonMaskElement &&
+                    buttonMaskElement.Enabled &&
+                    Enum.TryParse<MenuButtonAction>(buttonMaskElement.Action, out var action))
                 {
-                    layoutButtonMasks.Add(new RuntimeButtonMask(buttonMaskElement.Action, rectangle));
+                    layoutButtonMasks.Add(new RuntimeButtonMask(action, rectangle));
                 }
             }
 
@@ -219,7 +239,7 @@ namespace StarSmuggler.Screens
         private void DrawLayoutText(SpriteBatch spriteBatch, RuntimeTextElement runtimeText)
         {
             var element = runtimeText.Element;
-            float scale = (float)element.FontScale;
+            float scale = runtimeText.FontScale;
             var textSize = runtimeText.Font.MeasureString(element.Text) * scale;
             float x = element.HorizontalAlignment switch
             {
@@ -256,34 +276,75 @@ namespace StarSmuggler.Screens
             int startY = 450;
             int spacing = 70;
 
-            for (int i = 0; i < labels.Length; i++)
+            for (int i = 0; i < fallbackMenuItems.Length; i++)
             {
                 var rect = new Rectangle(700, startY + i * spacing, 200, 50);
-                fallbackButtons.Add(new Button(rect, labels[i], font, buttonTexture));
+                fallbackButtons.Add(new Button(rect, fallbackMenuItems[i].Label, font, buttonTexture));
             }
         }
 
         private void HandleFallbackClick(int index)
         {
-            HandleAction(labels[index].Replace(" ", string.Empty));
+            if (index >= 0 && index < fallbackMenuItems.Length)
+            {
+                HandleAction(fallbackMenuItems[index].Action);
+            }
         }
 
-        private void HandleAction(string action)
+        private bool UpdatePendingAction(GameTime gameTime)
+        {
+            if (pendingAction is null)
+            {
+                return false;
+            }
+
+            pendingActionSecondsRemaining -= gameTime.ElapsedGameTime.TotalSeconds;
+            if (pendingActionSecondsRemaining > 0)
+            {
+                return true;
+            }
+
+            var action = pendingAction.Value;
+            pendingAction = null;
+            pendingActionSecondsRemaining = 0;
+            ExecuteAction(action);
+            return true;
+        }
+
+        private void HandleAction(MenuButtonAction action)
         {
             // JSON actions intentionally dispatch through the same behavior as the
             // hardcoded fallback buttons, including the existing stranded-save guard.
+            if (pendingAction is not null)
+            {
+                return;
+            }
+
             Game1.AudioManager.PlaySfx("click");
+
+            if (action == MenuButtonAction.NewGame)
+            {
+                // Preserve the click-audio beat without freezing update/draw on the main thread.
+                pendingAction = action;
+                pendingActionSecondsRemaining = NewGameActionDelaySeconds;
+                return;
+            }
+
+            ExecuteAction(action);
+        }
+
+        private static void ExecuteAction(MenuButtonAction action)
+        {
+            var gameManager = GameManager.Instance;
             switch (action)
             {
-                case nameof(MenuButtonAction.NewGame):
-                    System.Threading.Thread.Sleep(300);
-                    GameManager.Instance.StartNewGame();
+                case MenuButtonAction.NewGame:
+                    gameManager.StartNewGame();
                     break;
-                case nameof(MenuButtonAction.LoadGame):
-                    GameManager.Instance.LoadGame();
+                case MenuButtonAction.LoadGame:
+                    gameManager.LoadGame();
                     break;
-                case nameof(MenuButtonAction.SaveGame):
-                    var gameManager = GameManager.Instance;
+                case MenuButtonAction.SaveGame:
                     if (gameManager.HasActiveGame && !gameManager.CheckForGameOver())
                         SaveLoadManager.SaveGame(gameManager.Player, GameState.PortOverview);
                     else if (gameManager.HasActiveGame)
@@ -291,7 +352,7 @@ namespace StarSmuggler.Screens
                     else
                         Console.WriteLine("No active game to save.");
                     break;
-                case nameof(MenuButtonAction.Quit):
+                case MenuButtonAction.Quit:
                     Game1.ExitGame();
                     break;
             }
@@ -325,8 +386,10 @@ namespace StarSmuggler.Screens
             return Color.White;
         }
 
-        private sealed record RuntimeTextElement(TextElement Element, SpriteFont Font, Rectangle Bounds);
+        private sealed record FallbackMenuItem(string Label, MenuButtonAction Action);
 
-        private sealed record RuntimeButtonMask(string Action, Rectangle Bounds);
+        private sealed record RuntimeTextElement(TextElement Element, SpriteFont Font, Rectangle Bounds, float FontScale);
+
+        private sealed record RuntimeButtonMask(MenuButtonAction Action, Rectangle Bounds);
     }
 }

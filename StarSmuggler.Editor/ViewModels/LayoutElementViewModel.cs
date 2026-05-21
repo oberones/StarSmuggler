@@ -16,9 +16,12 @@ public sealed class LayoutElementViewModel : ViewModelBase
         new FontColorOption("Muted Gray", "#FF8995A8")
     ];
 
+    private IBrush colorBrush;
+
     public LayoutElementViewModel(MenuLayoutElement element)
     {
         Element = element;
+        colorBrush = CreateColorBrush(Color);
     }
 
     public MenuLayoutElement Element { get; }
@@ -141,6 +144,7 @@ public sealed class LayoutElementViewModel : ViewModelBase
             if (TextElement is not null && TextElement.Color != value)
             {
                 TextElement.Color = value;
+                colorBrush = CreateColorBrush(value);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(SelectedFontColorOption));
                 OnPropertyChanged(nameof(ColorBrush));
@@ -150,7 +154,7 @@ public sealed class LayoutElementViewModel : ViewModelBase
 
     public IReadOnlyList<FontColorOption> FontColorOptions => AvailableFontColorOptions;
 
-    public IBrush ColorBrush => new SolidColorBrush(ParseColor(Color));
+    public IBrush ColorBrush => colorBrush;
 
     public FontColorOption? SelectedFontColorOption
     {
@@ -230,6 +234,11 @@ public sealed class LayoutElementViewModel : ViewModelBase
         OnPropertyChanged(nameof(Width));
         OnPropertyChanged(nameof(Height));
         OnPropertyChanged(nameof(Bounds));
+    }
+
+    private static IBrush CreateColorBrush(string color)
+    {
+        return new SolidColorBrush(ParseColor(color));
     }
 
     private static Color ParseColor(string color)

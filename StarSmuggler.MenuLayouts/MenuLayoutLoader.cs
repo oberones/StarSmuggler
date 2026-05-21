@@ -20,7 +20,7 @@ public static class MenuLayoutLoader
         {
             json = File.ReadAllText(path);
         }
-        catch (IOException ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             return MenuLayoutLoadResult.Fallback(
                 MenuLayoutFallbackReason.IoError,
@@ -62,7 +62,12 @@ public static class MenuLayoutLoader
             throw new InvalidOperationException($"Cannot save invalid menu layout: {issueList}");
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        string? directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
         File.WriteAllText(path, MenuLayoutJson.Serialize(document));
     }
 

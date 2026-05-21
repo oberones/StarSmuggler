@@ -124,6 +124,53 @@ public sealed class MainMenuLayoutLoaderTests
         Assert.True(result.Loaded);
     }
 
+    [Fact]
+    public void TryLoadReturnsIoFallbackForUnreadableLayoutWhenSupported()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        string path = WriteTempLayout(MenuLayoutTestData.CreateValidDocument());
+        UnixFileMode originalMode = File.GetUnixFileMode(path);
+
+        try
+        {
+            File.SetUnixFileMode(path, UnixFileMode.None);
+
+            var result = MenuLayoutLoader.TryLoad(path);
+
+            Assert.False(result.Loaded);
+            Assert.Equal(MenuLayoutFallbackReason.IoError, result.FallbackReason);
+        }
+        finally
+        {
+            File.SetUnixFileMode(path, originalMode);
+        }
+    }
+
+    [Fact]
+    public void SaveSupportsPathWithoutDirectoryComponent()
+    {
+        string originalDirectory = Environment.CurrentDirectory;
+        string directory = Path.Combine(Path.GetTempPath(), "StarSmugglerMenuLayoutTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+
+        try
+        {
+            Environment.CurrentDirectory = directory;
+
+            MenuLayoutLoader.Save("main-menu.json", MenuLayoutTestData.CreateValidDocument());
+
+            Assert.True(File.Exists(Path.Combine(directory, "main-menu.json")));
+        }
+        finally
+        {
+            Environment.CurrentDirectory = originalDirectory;
+        }
+    }
+
     private static string WriteTempLayout(MenuLayoutDocument document)
     {
         return WriteTempJson(MenuLayoutJson.Serialize(document));

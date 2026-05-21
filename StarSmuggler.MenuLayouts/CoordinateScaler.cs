@@ -33,6 +33,21 @@ public static class CoordinateScaler
             Math.Max(1, ScaleValue(source.Height, scaleY)));
     }
 
+    public static double ScaleFontScale(double sourceFontScale, int sourceCanvasHeight, int viewportHeight)
+    {
+        if (sourceCanvasHeight <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sourceCanvasHeight), "Source canvas height must be positive.");
+        }
+
+        if (viewportHeight <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(viewportHeight), "Viewport height must be positive.");
+        }
+
+        return sourceFontScale * viewportHeight / sourceCanvasHeight;
+    }
+
     private static int ScaleValue(int value, double scale)
     {
         return (int)Math.Round(value * scale, MidpointRounding.AwayFromZero);

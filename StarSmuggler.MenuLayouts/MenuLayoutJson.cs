@@ -5,7 +5,7 @@ namespace StarSmuggler.MenuLayouts;
 
 public static class MenuLayoutJson
 {
-    public static JsonSerializerOptions Options { get; } = CreateOptions();
+    private static readonly JsonSerializerOptions Options = CreateOptions();
 
     /// <summary>
     /// Central serializer options keep editor and runtime JSON property names deterministic.

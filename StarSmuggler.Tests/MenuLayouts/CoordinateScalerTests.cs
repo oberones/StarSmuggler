@@ -21,4 +21,12 @@ public sealed class CoordinateScalerTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             CoordinateScaler.ScaleRect(new MenuLayoutRect(0, 0, 10, 10), 0, 1024, 768, 512));
     }
+
+    [Fact]
+    public void ScaleFontScaleUsesViewportHeight()
+    {
+        double scaled = CoordinateScaler.ScaleFontScale(1.0, 1024, 512);
+
+        Assert.Equal(0.5, scaled);
+    }
 }
