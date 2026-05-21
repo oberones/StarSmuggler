@@ -1,0 +1,5 @@
+<UserControl
+    x:Class="StarSmuggler.Editor.Views.DesignSurface"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Focusable="True" />

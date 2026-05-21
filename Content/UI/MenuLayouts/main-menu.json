@@ -1,0 +1,117 @@
+{
+  "Version": 1,
+  "CanvasWidth": 1536,
+  "CanvasHeight": 1024,
+  "BackgroundAsset": "UI/MainMenu",
+  "Elements": [
+    {
+      "Type": "Text",
+      "Id": "title",
+      "X": 434,
+      "Y": 24,
+      "Width": 732,
+      "Height": 306,
+      "Text": "STAR SMUGGLER",
+      "FontKey": "Fonts/TerminalBold",
+      "FontScale": 6,
+      "Color": "#FF38F58B",
+      "HorizontalAlignment": "Center"
+    },
+    {
+      "Type": "Text",
+      "Id": "new-game-label",
+      "X": 700,
+      "Y": 496,
+      "Width": 200,
+      "Height": 50,
+      "Text": "New Game",
+      "FontKey": "Fonts/TerminalBold",
+      "FontScale": 2,
+      "Color": "#FFFFFFFF",
+      "HorizontalAlignment": "Center"
+    },
+    {
+      "Type": "ButtonMask",
+      "Id": "new-game",
+      "X": 701,
+      "Y": 498,
+      "Width": 200,
+      "Height": 50,
+      "Action": "NewGame",
+      "Label": "New Game",
+      "Enabled": true
+    },
+    {
+      "Type": "Text",
+      "Id": "load-game-label",
+      "X": 699,
+      "Y": 569,
+      "Width": 200,
+      "Height": 50,
+      "Text": "Load Game",
+      "FontKey": "Fonts/TerminalBold",
+      "FontScale": 2,
+      "Color": "#FFFFFFFF",
+      "HorizontalAlignment": "Center"
+    },
+    {
+      "Type": "ButtonMask",
+      "Id": "load-game",
+      "X": 699,
+      "Y": 568,
+      "Width": 200,
+      "Height": 50,
+      "Action": "LoadGame",
+      "Label": "Load Game",
+      "Enabled": true
+    },
+    {
+      "Type": "Text",
+      "Id": "save-game-label",
+      "X": 700,
+      "Y": 642,
+      "Width": 200,
+      "Height": 50,
+      "Text": "Save Game",
+      "FontKey": "Fonts/TerminalBold",
+      "FontScale": 2,
+      "Color": "#FFFFFFFF",
+      "HorizontalAlignment": "Center"
+    },
+    {
+      "Type": "ButtonMask",
+      "Id": "save-game",
+      "X": 700,
+      "Y": 642,
+      "Width": 200,
+      "Height": 50,
+      "Action": "SaveGame",
+      "Label": "Save Game",
+      "Enabled": true
+    },
+    {
+      "Type": "Text",
+      "Id": "quit-label",
+      "X": 699,
+      "Y": 722,
+      "Width": 200,
+      "Height": 50,
+      "Text": "Quit",
+      "FontKey": "Fonts/TerminalBold",
+      "FontScale": 2,
+      "Color": "#FFFFFFFF",
+      "HorizontalAlignment": "Center"
+    },
+    {
+      "Type": "ButtonMask",
+      "Id": "quit",
+      "X": 701,
+      "Y": 721,
+      "Width": 200,
+      "Height": 50,
+      "Action": "Quit",
+      "Label": "Quit",
+      "Enabled": true
+    }
+  ]
+}

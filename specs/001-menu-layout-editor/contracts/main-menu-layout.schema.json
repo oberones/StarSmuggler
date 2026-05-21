@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starsmuggler.local/contracts/main-menu-layout.schema.json",
+  "title": "Star Smuggler Main Menu Layout",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "Version",
+    "CanvasWidth",
+    "CanvasHeight",
+    "BackgroundAsset",
+    "Elements"
+  ],
+  "properties": {
+    "Version": {
+      "type": "integer",
+      "const": 1
+    },
+    "CanvasWidth": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "CanvasHeight": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "BackgroundAsset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Elements": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/TextElement"
+          },
+          {
+            "$ref": "#/$defs/ButtonMaskElement"
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "TextElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Type",
+        "Id",
+        "X",
+        "Y",
+        "Width",
+        "Height",
+        "Text",
+        "FontKey",
+        "FontScale",
+        "Color",
+        "HorizontalAlignment"
+      ],
+      "properties": {
+        "Type": {
+          "const": "Text"
+        },
+        "Id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "X": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "Y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "Width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "Height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "Text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "FontKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "FontScale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "Color": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$"
+        },
+        "HorizontalAlignment": {
+          "type": "string",
+          "enum": [
+            "Left",
+            "Center",
+            "Right"
+          ]
+        }
+      }
+    },
+    "ButtonMaskElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Type",
+        "Id",
+        "X",
+        "Y",
+        "Width",
+        "Height",
+        "Action",
+        "Enabled"
+      ],
+      "properties": {
+        "Type": {
+          "const": "ButtonMask"
+        },
+        "Id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "X": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "Y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "Width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "Height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "Action": {
+          "type": "string",
+          "enum": [
+            "NewGame",
+            "LoadGame",
+            "SaveGame",
+            "Quit"
+          ]
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Enabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

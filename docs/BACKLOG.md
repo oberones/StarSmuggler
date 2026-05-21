@@ -293,6 +293,22 @@ These items should happen in support of feature delivery rather than as isolated
 - Replace stale date-based milestones with versioned or milestone-based planning.
 - Keep CLAUDE.md, README.md, ROADMAP.md, and this backlog aligned.
 
+### S4. Layout Editor Post-MVP
+
+- Priority: P2
+- Effort: M
+- Dependencies: Main menu layout editor MVP
+- Tasks:
+- Extend the editor beyond the main menu once the first JSON runtime path has proven stable.
+- Add multi-screen layout selection and screen-specific layout files.
+- Explore polygon or alpha-based hit masks for irregular artwork only after rectangle masks are reliable.
+- Add optional animation timeline and transition metadata for future menu polish.
+- Add audio cue metadata only after runtime audio ownership is clear.
+- Consider content-pipeline management tools, but keep them separate from the runtime layout contract.
+- Acceptance criteria:
+- Post-MVP editor work continues to export repo-relative, runtime-loadable layout data.
+- The MonoGame runtime remains free of Avalonia or editor-framework dependencies.
+
 ## Recommended Release Slices
 
 ### Slice 1: Polish Update
