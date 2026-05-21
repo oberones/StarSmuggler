@@ -1,0 +1,50 @@
+<Window
+    x:Class="StarSmuggler.Editor.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="clr-namespace:StarSmuggler.Editor.Views"
+    Title="Star Smuggler Menu Layout Editor"
+    Width="1280"
+    Height="860"
+    MinWidth="960"
+    MinHeight="720">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Padding="8" Background="#20242C">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Open Image" Command="{Binding OpenImageCommand}" />
+        <Button Content="Open Layout" Command="{Binding OpenLayoutCommand}" />
+        <Button Content="Save Layout" Command="{Binding SaveLayoutCommand}" />
+        <Separator />
+        <Button Content="Add Text" Command="{Binding AddTextCommand}" />
+        <Button Content="Add Button Mask" Command="{Binding AddButtonMaskCommand}" />
+        <Button Content="Delete" Command="{Binding DeleteSelectedCommand}" />
+        <TextBlock Margin="16,0,0,0" VerticalAlignment="Center" Foreground="#DCE7F7" Text="{Binding BackgroundAsset}" />
+      </StackPanel>
+    </Border>
+
+    <Grid ColumnDefinitions="*,320">
+      <Border Grid.Column="0" Background="#11151B">
+        <views:DesignSurface />
+      </Border>
+
+      <Border Grid.Column="1" BorderBrush="#303847" BorderThickness="1,0,0,0" Background="#171C24">
+        <ScrollViewer>
+          <StackPanel Spacing="12" Margin="12">
+            <views:PropertyPanel />
+
+            <TextBlock Text="Validation" FontWeight="Bold" Foreground="#DCE7F7" />
+            <ItemsControl ItemsSource="{Binding ValidationMessages}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Padding="8" Margin="0,0,0,6" BorderBrush="#704A25" BorderThickness="1" Background="#2A1F17">
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="#FFD7AA" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </DockPanel>
+</Window>

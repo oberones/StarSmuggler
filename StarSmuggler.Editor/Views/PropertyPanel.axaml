@@ -1,0 +1,64 @@
+<UserControl
+    x:Class="StarSmuggler.Editor.Views.PropertyPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel Spacing="8">
+    <TextBlock Text="Selection" FontWeight="Bold" Foreground="#DCE7F7" />
+
+    <TextBlock Text="No element selected" Foreground="#8995A8" IsVisible="{Binding !HasSelection}" />
+
+    <StackPanel Spacing="8" IsVisible="{Binding HasSelection}">
+      <TextBlock Text="{Binding SelectedElement.Type}" Foreground="#9FB4D8" />
+
+      <TextBlock Text="Id" Foreground="#DCE7F7" />
+      <TextBox Text="{Binding SelectedElement.Id, Mode=TwoWay}" />
+
+      <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="6">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="X" Foreground="#DCE7F7" />
+        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding SelectedElement.X, Mode=TwoWay}" />
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="Y" Foreground="#DCE7F7" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedElement.Y, Mode=TwoWay}" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Width" Foreground="#DCE7F7" />
+        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding SelectedElement.Width, Mode=TwoWay}" />
+        <TextBlock Grid.Row="2" Grid.Column="1" Text="Height" Foreground="#DCE7F7" />
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding SelectedElement.Height, Mode=TwoWay}" />
+      </Grid>
+
+      <StackPanel Spacing="8" IsVisible="{Binding SelectedElement.IsText}">
+        <TextBlock Text="Text" Foreground="#DCE7F7" />
+        <TextBox Text="{Binding SelectedElement.Text, Mode=TwoWay}" AcceptsReturn="True" Height="70" />
+        <TextBlock Text="Font Key" Foreground="#DCE7F7" />
+        <TextBox Text="{Binding SelectedElement.FontKey, Mode=TwoWay}" />
+        <TextBlock Text="Font Scale" Foreground="#DCE7F7" />
+        <TextBox Text="{Binding SelectedElement.FontScale, Mode=TwoWay}" />
+        <TextBlock Text="Font Color" Foreground="#DCE7F7" />
+        <ComboBox
+            ItemsSource="{Binding SelectedElement.FontColorOptions}"
+            SelectedItem="{Binding SelectedElement.SelectedFontColorOption, Mode=TwoWay}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Width="18" Height="18" BorderBrush="#6E7889" BorderThickness="1" Background="{Binding Hex}" />
+                <TextBlock Text="{Binding DisplayName}" />
+              </StackPanel>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+          <Border Grid.Column="0" Width="28" Height="28" BorderBrush="#6E7889" BorderThickness="1" Background="{Binding SelectedElement.ColorBrush}" />
+          <TextBox Grid.Column="1" Text="{Binding SelectedElement.Color, Mode=TwoWay}" Watermark="#RRGGBB or #AARRGGBB" />
+        </Grid>
+        <TextBlock Text="Horizontal Alignment" Foreground="#DCE7F7" />
+        <TextBox Text="{Binding SelectedElement.HorizontalAlignment, Mode=TwoWay}" Watermark="Left, Center, or Right" />
+      </StackPanel>
+
+      <StackPanel Spacing="8" IsVisible="{Binding SelectedElement.IsButtonMask}">
+        <TextBlock Text="Action" Foreground="#DCE7F7" />
+        <TextBox Text="{Binding SelectedElement.Action, Mode=TwoWay}" Watermark="NewGame, LoadGame, SaveGame, or Quit" />
+        <TextBlock Text="Editor Label" Foreground="#DCE7F7" />
+        <TextBox Text="{Binding SelectedElement.Label, Mode=TwoWay}" />
+        <CheckBox Content="Enabled" IsChecked="{Binding SelectedElement.Enabled, Mode=TwoWay}" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

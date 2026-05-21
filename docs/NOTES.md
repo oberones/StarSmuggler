@@ -211,6 +211,15 @@ Factions:
         Conflict: constant raids against all factions for supplies
 
 
+Menu Layout Editor MVP Notes:
+  - Runtime layout path: `Content/UI/MenuLayouts/main-menu.json`.
+  - The standalone Avalonia editor writes a shared JSON contract owned by `StarSmuggler.MenuLayouts`, so the editor and game validate the same DTOs and schema rules.
+  - Layout coordinates are stored in the source 1536x1024 canvas coordinate system. `MainMenuScreen` scales X and Y independently to the active viewport at runtime.
+  - Button masks are visible outlines in the editor and invisible hit regions in the game. Optional mask labels are editor-facing context only.
+  - If the layout JSON is missing, malformed, unsupported, or invalid, `MainMenuScreen` logs a clear warning and keeps the hardcoded menu layout playable.
+  - Editor font preview is approximate. The MonoGame runtime SpriteFont render is authoritative for final text placement and readability.
+  - Exported JSON should use content asset keys or repo-relative paths only; never save machine-local absolute paths.
+
 TODO:
   - Add bad click sound
   - Adjust prices randomly up or down from base each time you travel

@@ -20,6 +20,7 @@ See:
 
 - [ROADMAP.md](ROADMAP.md) for milestone-level direction
 - [BACKLOG.md](BACKLOG.md) for prioritized implementation work
+- [MENU_LAYOUT_EDITOR_GUIDE.md](docs/MENU_LAYOUT_EDITOR_GUIDE.md) for main-menu layout editor usage
 - [CLAUDE.md](CLAUDE.md) for project architecture and design context
 
 ## Core Gameplay

@@ -15,6 +15,11 @@
     <None Remove="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="StarSmuggler.MenuLayouts/**/*.cs" />
+    <Compile Remove="StarSmuggler.Editor/**/*.cs" />
+    <Compile Remove="StarSmuggler.Tests/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Icon.ico">
       <LogicalName>Icon.ico</LogicalName>
     </EmbeddedResource>
@@ -25,6 +30,12 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="StarSmuggler.MenuLayouts\StarSmuggler.MenuLayouts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content/UI/MenuLayouts/*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

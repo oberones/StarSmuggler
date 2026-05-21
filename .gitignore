@@ -1,5 +1,14 @@
 .config/*
 !.config/dotnet-tools.json
 .vscode
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+packages/
 obj/
 bin/
