@@ -2,174 +2,77 @@
 
 ## Project Overview
 
-**Star Smuggler** is a retro-futuristic space trading game inspired by classic *Dope Wars* but with expanded mechanics. Built with MonoGame/C#/.NET 8.0, it's designed to be cross-platform with a focus on immersive world-building, atmospheric storytelling, and strategic trading mechanics.
+Star Smuggler is a retro-futuristic space-trading game inspired by *Dope Wars*.
+The playable runtime uses C#/.NET 8 and MonoGame DesktopGL. The repository also
+contains an Avalonia desktop editor for the main-menu layout, a shared layout
+contract library, and an xUnit test project.
 
-### Core Vision
-- **Retro-futuristic aesthetic**: Terminal-inspired UI with atmospheric backgrounds
-- **World-building focus**: Rich port descriptions, character interactions, evolving narrative
-- **Strategic depth**: Beyond simple trading - quests, minigames, faction systems planned
-- **Atmospheric immersion**: Dynamic music, sound effects, visual storytelling
+Windows is the primary development target. MonoGame DesktopGL and the Avalonia
+editor are intended to remain cross-platform.
 
-## Technical Architecture
+## Solution Structure
 
-### Framework & Dependencies
-- **.NET 8.0** with **MonoGame 3.8+** framework
-- **Windows primary platform** (cross-platform planned)
-- **JSON serialization** for save/load system
-- **Content Pipeline** for assets (textures, fonts, audio)
+The solution contains four .NET 8 projects:
 
-### Core Design Patterns
+- `StarSmuggler.csproj`: MonoGame runtime.
+- `StarSmuggler.MenuLayouts/`: shared menu-layout DTOs, JSON serialization,
+  validation, loading, and coordinate scaling.
+- `StarSmuggler.Editor/`: standalone Avalonia main-menu layout editor. Avalonia
+  dependencies belong here and must not be added to the game runtime.
+- `StarSmuggler.Tests/`: xUnit tests for layout contracts, validation, scaling,
+  editor services, and runtime fallback behavior.
 
-#### Singleton GameManager
-```csharp
-public class GameManager
-{
-    public static GameManager Instance { get; private set; } = new GameManager();
-    // Central authority for game state, player data, and core mechanics
-}
-```
+Important directories and files:
 
-#### Screen-Based Architecture
-- **ScreenManager**: Handles screen lifecycle and transitions
-- **IScreen interface**: Standardized screen implementation
-- **Game state enum**: Drives screen transitions and game flow
-
-#### Component-Based UI
-- Reusable UI components (`Button`, `Terminal`, `InfoPanel`, etc.)
-- Modular design for consistent styling and behavior
-
-## Game Systems
-
-### Economic System
-
-#### Zone-Based Trading
-```
-Inner Zone (Mercury, Venus, Luna, Mars)
-├── Common items: Cheap to buy, expensive to sell in Fringe
-├── Exotic items: Expensive to buy, cheap to sell
-└── Starting location for new players
-
-Outer Zone (Ceres, Europa, Titan)  
-├── Mid-tier items: Balanced pricing
-├── Mix of common and exotic goods
-└── Intermediate trading posts
-
-Fringe Zone (Pluto, Kuiper)
-├── Exotic items: Cheap to buy, expensive to sell in Inner
-├── Common items: Expensive to buy, cheap to sell  
-└── High-risk, high-reward trading
-```
-
-#### Dynamic Pricing
-- **Price updates**: Every 4+ jumps based on random variance + zone markup
-- **Market events**: Random events can crash/boost specific item prices
-- **Rarity-based markup**: Common/MidTier/Exotic items have different zone preferences
-
-#### Travel Economics
-- **Base cost**: 15 credits minimum
-- **Zone distance**: +2 credits per zone difference
-- **Long distance**: 2x multiplier for 2+ zone jumps
-- **Game over condition**: <15 credits + unable to sell cargo for travel funds
-
-### Player Progression
-
-#### Starting Conditions
-- **500 credits** starting funds
-- **30 unit cargo limit**
-- **Random Inner zone port** starting location
-- **No starting cargo**
-
-#### Progression Mechanics
-- **Credit accumulation**: Primary success metric
-- **Trading efficiency**: Learning optimal buy/sell routes
-- **Risk management**: Balancing travel costs vs. profit potential
-- **Event handling**: Dealing with random encounters (30% chance per travel)
-
-### Random Events System
-```csharp
-// Event structure
-public class GameEvent
-{
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public Action<PlayerData> ApplyEffect { get; set; }
-}
-```
-
-#### Current Events
-- **Market Glut**: Halves item price at current port
-- **Lost Cargo**: Removes random cargo item
-- **Pirate Ambush**: Loses 50-200 credits
-- **Engine Malfunction**: Loses 100-300 credits
-
-### Port System
-
-#### Port Zones & Characteristics
-```csharp
-public enum PortZone { Inner, Outer, Fringe }
-
-// Example ports with atmospheric descriptions
-"Mercury Foundry Complex" - Industrial heat-tech specialist
-"Venus Sky Habitats" - Corporate cartel floating cities  
-"Luna Central Station" - Major Inner zone trading hub
-"Pluto Relic Vault" - Forbidden ancient tech discoveries
-"Kuiper Flotilla" - Nomadic pirate fleet beyond Neptune
-```
-
-#### Port Features
-- **Available items**: 4 zone-appropriate + 2 cross-zone items
-- **Dynamic prices**: Updated based on economic cycles
-- **Atmospheric assets**: Background images, preview images, music tracks
-- **Rich descriptions**: Immersive world-building text
-
-## Technical Implementation
-
-### File Structure
-```
+```text
 StarSmuggler/
-├── Audio/              # AudioManager class
-├── Content/            # MonoGame assets
-│   ├── Fonts/         # SpriteFont files
-│   ├── Music/         # Background tracks  
-│   ├── Ports/         # Port images/previews
-│   └── UI/            # Interface textures
-├── Data/              # Future data management
-├── docs/              # Project planning and setup documentation
-│   ├── BACKLOG.md     # Outstanding work and feature ideas
-│   ├── NOTES.md       # Development notes and reference material
-│   ├── ROADMAP.md     # Planned milestones and feature direction
-│   └── TRAVEL_ANIMATION_SETUP.md # Travel animation implementation notes
-├── Events/            # Event system (GameEvent, EventDatabase)
-├── Items/             # Item system (Item, ItemsDatabase)
-├── Player/            # PlayerData class
-├── Ports/             # Port system (Port, PortsDatabase)
-├── Screens/           # Screen implementations
-└── UI/                # Reusable UI components
+|-- Audio/                         # AudioManager
+|-- Content/                       # MonoGame assets and Content.mgcb
+|   |-- Fonts/
+|   |-- FX/
+|   |-- Music/
+|   |-- Ports/
+|   |-- Screens/
+|   |-- Trade/
+|   `-- UI/MenuLayouts/            # Runtime-readable layout JSON
+|-- Events/                        # GameEvent and EventDatabase
+|-- Factions/                      # Faction definitions/future work
+|-- Items/                         # Item and ItemsDatabase
+|-- Player/                        # PlayerData
+|-- Ports/                         # Port and PortsDatabase
+|-- Screens/                       # Runtime screens and ScreenManager
+|-- UI/                            # Reusable MonoGame UI components
+|-- StarSmuggler.Editor/           # Avalonia layout editor
+|-- StarSmuggler.MenuLayouts/      # Shared layout library
+|-- StarSmuggler.Tests/            # Automated tests
+|-- docs/                          # Project and editor documentation
+|-- specs/001-menu-layout-editor/  # Feature design artifacts
+|-- Game1.cs                       # MonoGame entry point and registration
+|-- GameManager.cs                 # Gameplay state and economy coordinator
+`-- SaveLoadManager.cs             # JSON persistence
 ```
 
-### Key Classes
+## Runtime Architecture
 
-#### GameManager.cs
-- **Singleton pattern**: Central game authority
-- **State management**: Game state transitions
-- **Economic logic**: Price calculations, travel costs, markups
-- **Game loop coordination**: Save/load, event triggering, game over detection
+### Game and Screen State
 
-#### PlayerData.cs
-```csharp
-public class PlayerData
-{
-    public int Credits { get; set; }
-    public Dictionary<Item, int> CargoHold { get; set; }
-    public int CargoLimit { get; set; } // 30 units
-    public Port CurrentPort { get; set; }
-    public Dictionary<string, Dictionary<string, int>> CurrentPrices { get; set; }
-    public int JumpsSinceLastUpdate { get; set; }
-    public GameEvent CurrentEvent { get; set; }
-}
-```
+`GameManager.Instance` is the central authority for the active `PlayerData`,
+game state, prices, travel, random events, and game-over routing. Keep state
+changes going through its public behavior rather than duplicating rules in a
+screen.
 
-#### Screen System
+`ScreenManager` maps `GameState` values to `IScreen` implementations. `Game1`
+currently registers:
+
+- `MainMenuScreen`
+- `PortOverviewScreen`
+- `TradeScreen`
+- `TravelScreen`
+- `TravelAnimationScreen`
+- `GameOverScreen`
+
+Every screen implements:
+
 ```csharp
 public interface IScreen
 {
@@ -180,167 +83,128 @@ public interface IScreen
 }
 ```
 
-### Current Screens
-- **MainMenuScreen**: Entry point, continue/new game
-- **PortOverviewScreen**: Port description and atmosphere
-- **TradeScreen**: Buy/sell interface with quantity controls
-- **TravelScreen**: Port selection with cost preview
-- **GameOverScreen**: End state with restart option
+To add a screen, implement `IScreen`, add a `GameState` value, and register the
+screen in `Game1.LoadContent()`.
 
-## Development Guidelines
+### Main-Menu Layout
 
-### Code Style & Patterns
-- **Clear documentation**: Comprehensive XML comments for public methods
-- **Generous intent comments**: Document library usage, gameplay formulas, screen
-  state transitions, content-pipeline assumptions, and save/load schema behavior
-- **Meaningful naming**: Self-documenting variable and method names
-- **Single responsibility**: Classes focused on specific functionality
-- **Event-driven architecture**: Loose coupling between systems
+`MainMenuScreen` loads `Content/UI/MenuLayouts/main-menu.json` through the
+shared layout library. The JSON uses source coordinates for a 1536x1024 canvas;
+the runtime scales them for drawing and hit testing. Missing or invalid layout
+data falls back to the hardcoded menu so the game remains playable.
 
-### Constitution & Quality Gates
-- Follow `.specify/memory/constitution.md` for code quality, testing, TDD,
-  user experience consistency, and performance requirements.
-- Define a failing automated test or manual reproduction before production
-  behavior changes whenever practical.
-- Validate gameplay logic with focused tests where possible and manual
-  playtests for rendering, audio, and input flows.
-- Include build, test, and manual validation notes in pull requests.
+The standalone editor authors this one layout. See
+`docs/MENU_LAYOUT_EDITOR_GUIDE.md` and
+`specs/001-menu-layout-editor/plan.md`. Layout JSON is copied to the output by
+MSBuild and must not be added to `Content/Content.mgcb`.
 
-### MonoGame Best Practices
-- **Content Pipeline**: Use .mgcb for asset management
-- **SpriteBatch efficiency**: Minimize Begin/End calls
-- **Texture atlasing**: Consider for UI elements
-- **Font optimization**: SpriteFont files for different sizes
+### Trading and Travel
 
-### Future Architecture Considerations
-- **Component system**: For complex game objects (ships, equipment)
-- **Data-driven design**: JSON/XML configuration for ports, items, events
-- **Localization support**: String externalization for multi-language
-- **Mod support**: Plugin architecture for community content
+- A new player starts with 500 credits, a 30-unit cargo limit, no cargo, and a
+  random Inner-zone port.
+- Ports are grouped into `Inner`, `Outer`, and `Fringe` zones.
+- A port stocks four zone-appropriate items and two cross-zone items.
+- Prices initialize at game start and update after more than three completed
+  jumps. Price variance is combined with rarity/zone markup.
+- Travel costs 15 credits plus 2 per zone crossed. Crossing two zones doubles
+  that subtotal.
+- Travel runs through `TravelAnimationScreen`; completion applies the actual
+  port change, cost, price update, and possible event.
+- Each completed trip has a 30% chance to trigger an event.
+- The game ends when the player has fewer than 15 credits and cannot sell enough
+  locally available cargo to reach 15 credits.
 
-## Planned Features & Roadmap
+Current ports are Mercury, Venus, Luna, Mars, Ceres, Europa, Titan, Pluto, and
+the Kuiper Flotilla. Eris assets exist, but the Eris port definition is disabled.
 
-### Near-term Enhancements
-- **UI polish**: Improved visual effects, animations
-- **Additional ports**: Expand universe with more locations
-- **Enhanced events**: More diverse random encounters
-- **Audio expansion**: Port-specific music, more SFX
+### Persistence
 
-### Major Feature Additions
-- **Quest system**: Story-driven missions and contracts
-- **Faction reputation**: Relationship mechanics with different groups
-- **Ship upgrades**: Cargo capacity, fuel efficiency, combat capabilities
-- **Combat system**: Space battles with tactical elements
-- **Character system**: NPCs, crew members, dialogue trees
+`SaveLoadManager` serializes `SaveData` as JSON to:
 
-### Advanced Systems
-- **Galaxy map**: Visual navigation interface
-- **Minigames**: Hacking, negotiation, piloting challenges
-- **Procedural generation**: Dynamic events, port conditions
-- **Multiplayer**: Shared economy, player interaction
-
-## Working with the Codebase
-
-### Getting Started
-1. **Prerequisites**: .NET 8.0 SDK, MonoGame 3.8+
-2. **Run**: `dotnet run` or F5 in Visual Studio
-3. **Build**: `dotnet publish -c Release -r win-x64 --self-contained`
-
-### Project Documentation
-- **docs/BACKLOG.md**: Pending features, improvements, and future tasks
-- **docs/NOTES.md**: Working notes, implementation details, and references
-- **docs/ROADMAP.md**: Planned milestones and broader project direction
-- **docs/TRAVEL_ANIMATION_SETUP.md**: Setup notes for the travel animation flow
-
-### Common Development Tasks
-
-#### Adding New Items
-```csharp
-// In ItemsDatabase.cs
-new Item("item_id", "Item Name", basePrice, ItemRarity.Common)
+```text
+%AppData%/StarSmugglerGame/save.json
 ```
 
-#### Adding New Ports
-```csharp
-// In PortsDatabase.cs  
-new Port("port_id", "Port Name", "Description", PortZone.Inner, "imagePath", "previewPath", "musicTrack")
-```
+Save data records credits, cargo capacity and quantities, current port, prices,
+and saved game state. Persistence changes must consider compatibility with
+existing save files and document schema assumptions.
 
-#### Adding New Events
+## Common Changes
+
+Use the actual constructor signatures when extending databases:
+
 ```csharp
-// In EventDatabase.cs
-new GameEvent("Event Name", "Description", player => {
-    // Modify player state
+// Items/ItemsDatabase.cs
+new Item("item_id", "Item Name", "Description", ItemRarity.Common, basePrice)
+
+// Ports/PortsDatabase.cs
+new Port("port_id", "Port Name", "Description", PortZone.Inner,
+    "Ports/image", "Ports/imagePreview", "music_asset")
+
+// Events/EventDatabase.cs
+new GameEvent("Event Name", "Description", player =>
+{
+    // Apply event effects to player state.
 })
 ```
 
-#### Creating New Screens
-1. Implement `IScreen` interface
-2. Register in `Game1.LoadContent()`
-3. Add corresponding `GameState` enum value
+Content asset keys omit file extensions. Add pipeline-managed textures, fonts,
+and audio to `Content/Content.mgcb`. The menu-layout JSON is the exception: it
+is a directly read content file copied through the runtime project file.
 
-### Testing & Debugging
-- **Console output**: Extensive logging for trading, events, state changes
-- **Save system**: JSON files in `%AppData%/StarSmugglerGame/`
-- **Error handling**: Game over conditions, insufficient funds validation
+## Build, Run, and Test
 
-## Art & Asset Guidelines
+Prerequisites are the .NET 8 SDK and restored local tools. The repository pins
+`dotnet-mgcb` 3.8.4.1 in `.config/dotnet-tools.json`; project restore also has a
+target that restores local tools.
 
-### Visual Style
-- **Retro-futuristic aesthetic**: Clean lines, terminal-inspired UI
-- **Atmospheric backgrounds**: Distinctive port environments
-- **Consistent color palette**: Space-themed blues, grays, accent colors
-- **Readable fonts**: Terminal-style typefaces for immersion
-
-### Asset Specifications
-- **Port images**: Full-screen backgrounds (1536x1024 target)
-- **UI elements**: PNG with transparency support
-- **Audio**: MP3 for music, WAV for sound effects
-- **Fonts**: MonoGame SpriteFont format (.spritefont)
-
-### Content Organization
-```
-Content/
-├── Fonts/     # Different sizes: 12pt, 16pt, 18pt, bold variants
-├── Music/     # Atmospheric tracks per port/zone
-├── Ports/     # Background + preview image pairs
-├── UI/        # Buttons, panels, icons, terminal graphics
-└── FX/        # Sound effects (click, ambient)
+```powershell
+dotnet tool restore
+dotnet build StarSmuggler.sln
+dotnet test StarSmuggler.Tests/StarSmuggler.Tests.csproj
+dotnet run --project StarSmuggler.csproj
+dotnet run --project StarSmuggler.Editor/StarSmuggler.Editor.csproj
 ```
 
-## Performance Considerations
+Publish the Windows runtime with:
 
-### MonoGame Optimization
-- **Texture loading**: Lazy load port-specific assets
-- **Memory management**: Dispose unused textures
-- **Update efficiency**: Only update active screen
-- **Draw batching**: Minimize state changes in SpriteBatch
+```powershell
+dotnet publish StarSmuggler.csproj -c Release -r win-x64 --self-contained
+```
 
-### Save System
-- **JSON serialization**: Human-readable save files
-- **Incremental saves**: Save after significant state changes
-- **Error recovery**: Graceful handling of corrupted saves
+Before handing off a change, run the solution build, relevant focused tests,
+and `git diff --check`. Rendering, audio, and input changes also require a
+documented manual playtest.
 
-## Community & Contribution
+## Development Requirements
 
-### Open Source Philosophy
-- **MIT License**: Permissive for community contributions
-- **GitHub workflow**: Issues, pull requests, discussions
-- **Documentation first**: Clear guides for contributors
-- **Modular design**: Easy to extend and modify
+`.specify/memory/constitution.md` is authoritative for code quality, TDD,
+testing, user-experience consistency, and performance. In particular:
 
-### Contribution Areas
-- **Code**: Bug fixes, new features, optimizations
-- **Art**: Port backgrounds, UI improvements, animations
-- **Audio**: Music tracks, sound effects, ambient audio
-- **Writing**: Port descriptions, event text, world-building
-- **Testing**: Platform testing, balance feedback, bug reports
+- Start behavior changes with a failing automated test or explicit manual
+  reproduction whenever practical.
+- Add regression coverage for gameplay and persistence behavior that can be
+  tested deterministically.
+- Keep comments focused on intent, invariants, formulas, transitions, content
+  pipeline assumptions, and save compatibility; update stale comments.
+- Avoid per-frame asset loads, unnecessary allocations, excessive logging, and
+  avoidable `SpriteBatch.Begin`/`End` churn.
+- Keep navigation, disabled states, invalid-action feedback, and save/load
+  outcomes consistent across screens.
 
----
+The working tree may contain user changes. Preserve unrelated edits and do not
+discard or overwrite them while completing a task.
 
-*This guide should help you understand the codebase structure, development patterns, and vision for Star Smuggler. The project balances retro gaming nostalgia with modern development practices, aiming to create an immersive trading experience that goes beyond simple number manipulation.*
+## Documentation and Roadmap
 
-<!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read `specs/001-menu-layout-editor/plan.md`.
-<!-- SPECKIT END -->
+- `README.md`: contributor-facing project overview and setup.
+- `docs/MENU_LAYOUT_EDITOR_GUIDE.md`: editor workflow and layout constraints.
+- `docs/BACKLOG.md`: outstanding work and feature ideas.
+- `docs/ROADMAP.md`: planned milestones and direction.
+- `docs/NOTES.md`: implementation notes and references.
+- `docs/TRAVEL_ANIMATION_SETUP.md`: travel animation setup notes.
+
+Quest, reputation, ship upgrades, combat, expanded characters, and other major
+systems described in roadmap documents are planned work, not current runtime
+capabilities. Do not describe roadmap items as implemented without verifying
+the code first.
